@@ -9,6 +9,7 @@ export function middleware(request) {
     "/register",
     "/api/auth/login",
     "/api/auth/register",
+    "/api/seed",
   ];
 
   if (publicRoutes.includes(pathname)) {
