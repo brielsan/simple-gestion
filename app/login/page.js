@@ -6,13 +6,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -55,18 +49,10 @@ export default function LoginPage() {
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
           <h1 className="text-3xl font-bold text-gray-900">Simple Gestión</h1>
-          <p className="mt-2 text-sm text-gray-600">
-            Inicia sesión en tu cuenta
-          </p>
+          <p className="mt-2 text-sm text-gray-600">Login to your account</p>
         </div>
 
         <Card>
-          <CardHeader>
-            <CardTitle>Iniciar Sesión</CardTitle>
-            <CardDescription>
-              Ingresa tu email y contraseña para acceder
-            </CardDescription>
-          </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
@@ -76,13 +62,13 @@ export default function LoginPage() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="tu@email.com"
+                  placeholder="your@email.com"
                   required
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password">Contraseña</Label>
+                <Label htmlFor="password">Password</Label>
                 <Input
                   id="password"
                   type="password"
@@ -100,18 +86,18 @@ export default function LoginPage() {
               )}
 
               <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Iniciando sesión..." : "Iniciar Sesión"}
+                {isLoading ? "Starting session..." : "Login"}
               </Button>
             </form>
 
             <div className="mt-6 text-center">
               <p className="text-sm text-gray-600">
-                ¿No tienes una cuenta?{" "}
+                Don't have an account?{" "}
                 <Link
                   href="/register"
                   className="font-medium text-blue-600 hover:text-blue-500"
                 >
-                  Regístrate aquí
+                  Register here
                 </Link>
               </p>
             </div>

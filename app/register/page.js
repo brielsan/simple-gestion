@@ -6,13 +6,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
@@ -38,13 +32,13 @@ export default function RegisterPage() {
     setError("");
 
     if (formData.password !== formData.confirmPassword) {
-      setError("Las contraseñas no coinciden");
+      setError("The passwords do not match");
       setIsLoading(false);
       return;
     }
 
     if (formData.password.length < 6) {
-      setError("La contraseña debe tener al menos 6 caracteres");
+      setError("The password must be at least 6 characters");
       setIsLoading(false);
       return;
     }
@@ -83,10 +77,10 @@ export default function RegisterPage() {
           router.push("/login");
         }
       } else {
-        setError(data.error || "Error al registrar usuario");
+        setError(data.error || "Error registering user");
       }
     } catch (error) {
-      setError("Error de conexión");
+      setError("Connection error");
     } finally {
       setIsLoading(false);
     }
@@ -97,29 +91,21 @@ export default function RegisterPage() {
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
           <h1 className="text-3xl font-bold text-gray-900">Simple Gestión</h1>
-          <p className="mt-2 text-sm text-gray-600">
-            Crea tu cuenta para comenzar
-          </p>
+          <p className="mt-2 text-sm text-gray-600">Register to start</p>
         </div>
 
         <Card>
-          <CardHeader>
-            <CardTitle>Crear Cuenta</CardTitle>
-            <CardDescription>
-              Completa los datos para registrarte
-            </CardDescription>
-          </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="username">Nombre de Usuario</Label>
+                <Label htmlFor="username">Username</Label>
                 <Input
                   id="username"
                   name="username"
                   type="text"
                   value={formData.username}
                   onChange={handleChange}
-                  placeholder="Tu nombre de usuario"
+                  placeholder="Your username"
                   required
                 />
               </div>
@@ -132,13 +118,13 @@ export default function RegisterPage() {
                   type="email"
                   value={formData.email}
                   onChange={handleChange}
-                  placeholder="tu@email.com"
+                  placeholder="your@email.com"
                   required
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password">Contraseña</Label>
+                <Label htmlFor="password">Password</Label>
                 <Input
                   id="password"
                   name="password"
@@ -151,7 +137,7 @@ export default function RegisterPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirmar Contraseña</Label>
+                <Label htmlFor="confirmPassword">Confirm Password</Label>
                 <Input
                   id="confirmPassword"
                   name="confirmPassword"
@@ -170,18 +156,18 @@ export default function RegisterPage() {
               )}
 
               <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Creando cuenta..." : "Crear Cuenta"}
+                {isLoading ? "Creating account..." : "Register"}
               </Button>
             </form>
 
             <div className="mt-6 text-center">
               <p className="text-sm text-gray-600">
-                ¿Ya tienes una cuenta?{" "}
+                Already have an account?{" "}
                 <Link
                   href="/login"
                   className="font-medium text-blue-600 hover:text-blue-500"
                 >
-                  Inicia sesión aquí
+                  Login here
                 </Link>
               </p>
             </div>

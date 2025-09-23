@@ -38,15 +38,15 @@ export default function Header({ user }) {
 
       if (response.ok) {
         alert(
-          `Mock-up cargado exitosamente!\nMovimientos creados: ${data.movementsCreated}`
+          `Mock-up loaded successfully!\nMovements created: ${data.movementsCreated}`
         );
         router.refresh();
       } else {
         alert(`Error: ${data.error}`);
       }
     } catch (error) {
-      console.error("Error al cargar mock-up:", error);
-      alert("Error al cargar el mock-up");
+      console.error("Error loading the mock-up:", error);
+      alert("Error in loading the mock-up");
     } finally {
       setIsLoadingMockup(false);
     }
@@ -64,7 +64,7 @@ export default function Header({ user }) {
 
           <div className="flex items-center space-x-4">
             <span className="text-sm text-gray-700">
-              Hola, {user?.username}
+              Welcome, {user?.username}
             </span>
 
             <DropdownMenu>
@@ -80,14 +80,14 @@ export default function Header({ user }) {
                   className="cursor-pointer"
                 >
                   <Upload className="h-4 w-4 mr-2" />
-                  {isLoadingMockup ? "Cargando..." : "Cargar Mock-up"}
+                  {isLoadingMockup ? "Loading..." : "Load Mock-up"}
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={handleLogout}
                   className="cursor-pointer"
                 >
                   <LogOut className="h-4 w-4 mr-2" />
-                  Cerrar Sesión
+                  Logout
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
