@@ -34,13 +34,19 @@ export default function TimelineChart({ data, color }) {
     .reverse();
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Timeline</CardTitle>
-        <CardDescription>Timeline of your movements</CardDescription>
+    <Card className="w-full">
+      <CardHeader className="text-center">
+        <CardTitle className="text-base sm:text-lg">
+          Timeline {chartData.length === 4 ? "(Last 4 months)" : ""}
+        </CardTitle>
+        <CardDescription className="text-sm sm:text-base">
+          Timeline of your movements
+        </CardDescription>
       </CardHeader>
-      <CardContent>
+
+      <CardContent className="pt-0">
         <div className="w-full h-[1px] bg-gray-200 my-4" />
+
         <ChartContainer
           config={{
             month: {
@@ -53,13 +59,13 @@ export default function TimelineChart({ data, color }) {
               label: "Number of Movements",
             },
           }}
-          className="h-[300px]"
+          className="w-full min-h-[200px] sm:h-[300px]"
         >
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="month" />
-              <YAxis padding={{ top: 15 }} />
+              <XAxis dataKey="month" tick={{ fontSize: 10 }} minTickGap={15} />
+              <YAxis padding={{ top: 15 }} tick={{ fontSize: 10 }} />
               <ChartTooltip content={<ChartTooltipContent />} />
               <Area
                 type="monotone"

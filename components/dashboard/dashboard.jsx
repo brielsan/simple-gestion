@@ -11,7 +11,9 @@ import {
 import CardDashboard from "./card-dashboard";
 import CategoryChart from "./category-chart";
 import TimelineChart from "./timeline-chart";
+import TimelineBarChart from "./timeline-bar-chart";
 import { formatCapitalize } from "@/utils/formats";
+import CategoryBarChart from "./category-chart-bar";
 
 export default function Dashboard() {
   const [dashboardData, setDashboardData] = useState(null);
@@ -114,11 +116,24 @@ export default function Dashboard() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
-        <CategoryChart data={dashboardData.categoryStats} />
-        <TimelineChart
-          data={dashboardData.monthlyStats}
-          color={colorTimeline}
-        />
+        <div className="hidden md:block">
+          <CategoryChart data={dashboardData.categoryStats} />
+        </div>
+        <div className="block md:hidden">
+          <CategoryBarChart data={dashboardData.categoryStats} />
+        </div>
+        <div className="hidden md:block">
+          <TimelineChart
+            data={dashboardData.monthlyStats}
+            color={colorTimeline}
+          />
+        </div>
+        <div className="block md:hidden">
+          <TimelineBarChart
+            data={dashboardData.monthlyStats}
+            color={colorTimeline}
+          />
+        </div>
       </div>
     </div>
   );

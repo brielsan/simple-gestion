@@ -18,11 +18,13 @@ import {
 } from "@/components/ui/chart";
 
 export default function CategoryChart({ data }) {
-  const chartData = data.map((item, index) => ({
-    category: item.category,
-    amount: Math.abs(item.amount),
-    fill: `var(--chart-${(index % 5) + 1})`,
-  }));
+  const chartData = (data || [])
+    .map((item, index) => ({
+      category: item.category,
+      amount: Math.abs(item.amount),
+      fill: `var(--chart-${(index % 5) + 1})`,
+    }))
+    ?.slice(0, 10);
 
   const chartConfig = {
     amount: {
@@ -44,16 +46,21 @@ export default function CategoryChart({ data }) {
   };
 
   return (
-    <Card className="flex flex-col">
-      <CardHeader className="items-center pb-0">
-        <CardTitle>Expenses by Category</CardTitle>
-        <CardDescription>Distribution of expenses by category</CardDescription>
+    <Card className="flex flex-col bg-red">
+      <CardHeader className="items-center pb-0 text-center">
+        <CardTitle className="text-base sm:text-lg">
+          Expenses by Category {chartData.length === 10 ? "(Top 10)" : ""}
+        </CardTitle>
+        <CardDescription className="text-sm sm:text-base">
+          Distribution of expenses by category
+        </CardDescription>
       </CardHeader>
+
       <CardContent className="flex-1 pb-0">
-        <div className="w-full h-[1px] bg-gray-200 mt-4" />
+        <div className="w-full h-[1px] bg-gray-200 mt-4 mb-2" />
         <ChartContainer
           config={chartConfig}
-          className="mx-auto aspect-square max-h-[300px]"
+          className="w-full max-w-full mx-auto min-h-[300px] max-h-[200px] sm:max-h-[300px]"
         >
           <PieChart>
             <Pie data={chartData} dataKey="amount" />
@@ -62,7 +69,7 @@ export default function CategoryChart({ data }) {
             />
             <ChartLegend
               content={<ChartLegendContent nameKey="category" />}
-              className="-translate-y-2 flex-wrap gap-2 *:basis-1/4 *:justify-center"
+              className="mt-1 flex flex-wrap gap-2 justify-center *:basis-1/2 sm:*:basis-1/6"
             />
           </PieChart>
         </ChartContainer>

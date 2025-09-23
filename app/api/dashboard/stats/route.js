@@ -45,6 +45,7 @@ export async function GET() {
       WHERE m."userId" = ${user.id} AND m.deleted = false AND m.amount < 0
       GROUP BY c.id, c.name
       ORDER BY amount ASC
+      LIMIT 10
     `;
 
     const monthlyStats = await prisma.$queryRaw`
@@ -56,7 +57,7 @@ export async function GET() {
       WHERE "userId" = ${user.id} AND deleted = false
       GROUP BY DATE_TRUNC('month', "createdAt")
       ORDER BY month DESC
-      LIMIT 12
+      LIMIT 4
     `;
 
     const topSpendingCategory = categoryData?.[0] || null;
