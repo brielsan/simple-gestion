@@ -22,7 +22,7 @@ export async function GET() {
       },
     });
 
-    const totalPaid = await prisma.movement.aggregate({
+    const totalExpenses = await prisma.movement.aggregate({
       where: {
         userId: user.id,
         deleted: false,
@@ -64,7 +64,7 @@ export async function GET() {
 
     return NextResponse.json({
       totalEarned: Number(totalEarned._sum.amount),
-      totalPaid: Number(totalPaid._sum.amount),
+      totalExpenses: Number(totalExpenses._sum.amount),
       topSpendingCategory: topSpendingCategory,
       categoryStats: categoryData,
       monthlyStats: monthlyStats,

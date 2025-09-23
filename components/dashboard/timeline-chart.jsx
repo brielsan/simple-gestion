@@ -59,7 +59,7 @@ export default function TimelineChart({ data, color }) {
               label: "Number of Movements",
             },
           }}
-          className="w-full min-h-[200px] sm:h-[300px]"
+          className="w-full min-h-[200px] sm:h-[292px]"
         >
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={chartData}>

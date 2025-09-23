@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import {
   Loader2,
   DollarSign,
@@ -8,6 +8,7 @@ import {
   TrendingDown,
   Target,
 } from "lucide-react";
+import { useDashboardStats } from "@/hooks/use-dashboard";
 import CardDashboard from "./card-dashboard";
 import CategoryChart from "./category-chart";
 import TimelineChart from "./timeline-chart";
@@ -16,31 +17,16 @@ import { formatCapitalize } from "@/utils/formats";
 import CategoryBarChart from "./category-chart-bar";
 
 export default function Dashboard() {
-  const [dashboardData, setDashboardData] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        const response = await fetch("/api/dashboard/stats");
-        const data = await response.json();
-
-        if (response.ok) {
-          setDashboardData(data);
-        }
-      } catch (error) {
-        console.error("Error fetching dashboard data:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchDashboardData();
-  }, []);
+  const {
+    stats: dashboardData,
+    isLoading,
+    error,
+    mutate,
+  } = useDashboardStats();
 
   const colorTimeline = useMemo(() => {
     if (!dashboardData) return "text-gray-600";
-    return dashboardData.totalEarned + dashboardData.totalPaid > 0
+    return dashboardData.totalEarned + dashboardData.totalExpenses > 0
       ? "#00A63D"
       : "#E7000B";
   }, [dashboardData]);
@@ -50,7 +36,7 @@ export default function Dashboard() {
       dashboardData && [
         {
           title: "Total Balance",
-          amount: dashboardData.totalEarned + dashboardData.totalPaid,
+          amount: dashboardData.totalEarned + dashboardData.totalExpenses,
           description: "Summary of your balance",
           icon: DollarSign,
           color: "text-gray-600",
@@ -63,8 +49,8 @@ export default function Dashboard() {
           color: "text-green-600",
         },
         {
-          title: "Total Paid",
-          amount: Math.abs(dashboardData.totalPaid),
+          title: "Total Expenses",
+          amount: Math.abs(dashboardData.totalExpenses),
           description: "Sum of your expenses",
           icon: TrendingDown,
           color: "text-red-600",
@@ -84,7 +70,7 @@ export default function Dashboard() {
     [dashboardData]
   );
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
         <Loader2 className="h-8 w-8 animate-spin" />
@@ -92,10 +78,24 @@ export default function Dashboard() {
     );
   }
 
+  if (error) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-red-600 mb-2">Error loading dashboard data</p>
+        <button
+          onClick={() => mutate()}
+          className="text-blue-600 hover:underline"
+        >
+          Try again
+        </button>
+      </div>
+    );
+  }
+
   if (!dashboardData) {
     return (
       <div className="text-center py-8">
-        <p className="text-gray-500">Error loading dashboard data</p>
+        <p className="text-gray-500">No data available</p>
       </div>
     );
   }

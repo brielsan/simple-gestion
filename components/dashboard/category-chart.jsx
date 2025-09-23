@@ -46,7 +46,7 @@ export default function CategoryChart({ data }) {
   };
 
   return (
-    <Card className="flex flex-col bg-red">
+    <Card className="flex flex-col">
       <CardHeader className="items-center pb-0 text-center">
         <CardTitle className="text-base sm:text-lg">
           Expenses by Category {chartData.length === 10 ? "(Top 10)" : ""}
