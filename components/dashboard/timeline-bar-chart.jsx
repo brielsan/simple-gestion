@@ -52,7 +52,7 @@ export default function TimelineBarChart({ data, color }) {
           Timeline {chartData.length === 4 ? "(Last 4 months)" : ""}
         </CardTitle>
         <CardDescription className="text-sm sm:text-base">
-          Timeline of your movements
+          Timeline of your balance
         </CardDescription>
       </CardHeader>
       <CardContent>

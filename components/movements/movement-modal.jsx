@@ -1,0 +1,400 @@
+"use client";
+
+import { useState, useEffect, useCallback, useMemo } from "react";
+import { Plus, Edit, Trash2, ChevronDown, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useParameters } from "@/contexts/parameters-context";
+import { formatMoney } from "@/utils/formats";
+
+export default function MovementModal({
+  isOpen,
+  onClose,
+  onSave,
+  movement = null,
+  onEdit = null,
+  onDelete = null,
+  preSelectedType = null,
+}) {
+  const { categories, types, isLoading: parametersLoading } = useParameters();
+  const [formData, setFormData] = useState({
+    description: "",
+    amount: "",
+    categoryId: "",
+    typeId: "",
+  });
+  const [isLoading, setIsLoading] = useState(false);
+  const [errors, setErrors] = useState({});
+
+  const isEdit = !!movement;
+
+  const findTypeByName = useCallback(
+    (typeName) => {
+      if (!types || !typeName) return null;
+      return types.find((t) =>
+        t.name.toLowerCase().includes(typeName.toLowerCase())
+      );
+    },
+    [types]
+  );
+
+  const selectedType = useMemo(
+    () =>
+      formData.typeId ? types.find((t) => t.id === formData.typeId) : null,
+    [formData.typeId, types]
+  );
+
+  const isIncome = useMemo(
+    () =>
+      selectedType
+        ? selectedType?.name?.toLowerCase().includes("income")
+        : false,
+    [selectedType]
+  );
+
+  useEffect(() => {
+    if (movement) {
+      const displayAmount = Math.abs(movement.amount || 0).toString();
+      setFormData({
+        description: movement.description || "",
+        amount: displayAmount,
+        categoryId: movement.categoryId || "",
+        typeId: movement.typeId || "",
+      });
+    } else {
+      const preSelectedTypeId = preSelectedType
+        ? findTypeByName(preSelectedType)?.id || ""
+        : "";
+
+      setFormData({
+        description: "",
+        amount: "",
+        categoryId: "",
+        typeId: preSelectedTypeId,
+      });
+    }
+    setErrors({});
+  }, [movement, isOpen, preSelectedType, types, findTypeByName]);
+
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!formData.description.trim()) {
+      newErrors.description = "Description is required";
+    }
+
+    if (!formData.amount || isNaN(parseFloat(formData.amount))) {
+      newErrors.amount = "Valid amount is required";
+    }
+
+    if (!formData.categoryId) {
+      newErrors.categoryId = "Category is required";
+    }
+
+    if (!formData.typeId) {
+      newErrors.typeId = "Type is required";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = useCallback(
+    async (e) => {
+      e.preventDefault();
+
+      if (!validateForm()) return;
+
+      setIsLoading(true);
+
+      try {
+        let finalAmount = parseFloat(formData.amount);
+
+        if (!isIncome && !isEdit) {
+          finalAmount = -Math.abs(finalAmount);
+        } else if (!isIncome && isEdit) {
+          finalAmount = movement.amount;
+        } else if (isIncome) {
+          finalAmount = Math.abs(finalAmount);
+        }
+
+        const movementData = {
+          ...formData,
+          amount: finalAmount,
+        };
+
+        if (isEdit) {
+          await onEdit(movement.id, movementData);
+        } else {
+          await onSave(movementData);
+        }
+
+        onClose();
+      } catch (error) {
+        console.error("Error saving movement:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [isIncome, isEdit, movement, onSave, onEdit, formData]
+  );
+
+  const handleDelete = useCallback(async () => {
+    if (!movement || !onDelete) return;
+
+    if (confirm("Are you sure you want to delete this movement?")) {
+      setIsLoading(true);
+      try {
+        await onDelete(movement.id);
+        onClose();
+      } catch (error) {
+        console.error("Error deleting movement:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+  }, [movement, onDelete]);
+
+  const getThemeColors = useCallback(() => {
+    if (isIncome) {
+      return {
+        border: "border-green-200",
+        focus: "focus:border-green-500 focus:ring-green-500/20",
+        button: "bg-green-600 hover:bg-green-700 text-white",
+        header: "text-green-700",
+      };
+    } else {
+      return {
+        border: "border-red-200",
+        focus: "focus:border-red-500 focus:ring-red-500/20",
+        button: "bg-red-600 hover:bg-red-700 text-white",
+        header: "text-red-700",
+      };
+    }
+  }, [isIncome]);
+
+  const theme = getThemeColors();
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      {/* Overlay */}
+      <div className="fixed inset-0 bg-black/50" onClick={onClose} />
+
+      {/* Modal */}
+      <Card className="relative z-50 w-full max-w-md mx-4">
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle className={`flex items-center gap-2 ${theme.header}`}>
+            {isEdit ? (
+              <>
+                <Edit className="h-5 w-5" />
+                Edit Movement
+              </>
+            ) : (
+              <>{isIncome ? "New Income" : "New Expense"}</>
+            )}
+          </CardTitle>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onClose}
+            className="h-8 w-8 p-0"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </CardHeader>
+
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <label
+                htmlFor="description"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Description
+              </label>
+              <Input
+                id="description"
+                value={formData.description}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    description: e.target.value,
+                  }))
+                }
+                placeholder="Enter movement description"
+                className={`${theme.border} ${theme.focus}`}
+              />
+              {errors.description && (
+                <p className="text-sm text-red-600">{errors.description}</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <label
+                htmlFor="amount"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Amount
+              </label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+                  $
+                </span>
+                <Input
+                  id="amount"
+                  type="number"
+                  step="0.01"
+                  value={formData.amount}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, amount: e.target.value }))
+                  }
+                  placeholder="0.00"
+                  className={`pl-8 ${theme.border} ${theme.focus}`}
+                />
+              </div>
+              {errors.amount && (
+                <p className="text-sm text-red-600">{errors.amount}</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <label
+                htmlFor="category"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Category
+              </label>
+              <div className="relative">
+                <select
+                  id="category"
+                  value={formData.categoryId}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      categoryId: e.target.value,
+                    }))
+                  }
+                  className={`w-full px-3 py-2 pr-8 border rounded-md focus:outline-none focus:ring-2 appearance-none bg-white ${theme.border} ${theme.focus}`}
+                >
+                  <option value="">Select category</option>
+                  {categories.map((category) => (
+                    <option key={category.id} value={category.id}>
+                      {category.name}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+              </div>
+              {errors.categoryId && (
+                <p className="text-sm text-red-600">{errors.categoryId}</p>
+              )}
+            </div>
+            {!preSelectedType && (
+              <div className="space-y-2">
+                <label
+                  htmlFor="type"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Type
+                </label>
+                <div className="relative">
+                  <select
+                    id="type"
+                    value={formData.typeId}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        typeId: e.target.value,
+                      }))
+                    }
+                    disabled={!!preSelectedType && !movement}
+                    className={`w-full px-3 py-2 pr-8 border rounded-md focus:outline-none focus:ring-2 appearance-none bg-white ${
+                      theme.border
+                    } ${theme.focus} ${
+                      !!preSelectedType && !movement
+                        ? "opacity-50 cursor-not-allowed"
+                        : ""
+                    }`}
+                  >
+                    <option value="">Select type</option>
+                    {types.map((type) => (
+                      <option key={type.id} value={type.id}>
+                        {type.name}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+                </div>
+                {errors.typeId && (
+                  <p className="text-sm text-red-600">{errors.typeId}</p>
+                )}
+              </div>
+            )}
+
+            {formData.amount && (
+              <div
+                className={`p-3 rounded-lg ${
+                  isIncome
+                    ? "bg-green-50 border border-green-200"
+                    : "bg-red-50 border border-red-200"
+                }`}
+              >
+                <p className="text-sm text-gray-600">Preview:</p>
+                <p
+                  className={`font-semibold ${
+                    isIncome ? "text-green-700" : "text-red-700"
+                  }`}
+                >
+                  {(() => {
+                    const amount = parseFloat(formData.amount) || 0;
+                    // Para el preview, mostrar el signo correcto según el tipo
+                    const displayAmount = isIncome ? amount : -amount;
+                    return formatMoney(displayAmount);
+                  })()}
+                </p>
+              </div>
+            )}
+
+            <div className="flex gap-2 pt-4">
+              {isEdit && onDelete && (
+                <Button
+                  type="button"
+                  variant="destructive"
+                  onClick={handleDelete}
+                  disabled={isLoading}
+                  className="flex items-center gap-2"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  Delete
+                </Button>
+              )}
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onClose}
+                disabled={isLoading}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={isLoading}
+                className={`${theme.button} flex items-center gap-2 flex-1`}
+              >
+                {isLoading
+                  ? "Saving..."
+                  : isEdit
+                  ? "Update Movement"
+                  : "Create Movement"}
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}

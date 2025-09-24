@@ -2,6 +2,7 @@
 
 import { Badge } from "@/components/ui/badge";
 import { useParameters } from "@/contexts/parameters-context";
+import { formatCapitalize } from "@/utils/formats";
 
 export default function MovementsInfo({
   movementsCount,
@@ -22,12 +23,14 @@ export default function MovementsInfo({
           <span className="text-sm text-gray-500">Active filters:</span>
           {selectedCategory !== "all" && (
             <Badge variant="secondary">
-              {categories.find((c) => c.id === selectedCategory)?.name}
+              {formatCapitalize(
+                categories.find((c) => c.id === selectedCategory)?.name
+              )}
             </Badge>
           )}
           {selectedType !== "all" && (
             <Badge variant="secondary">
-              {types.find((t) => t.id === selectedType)?.name}
+              {formatCapitalize(types.find((t) => t.id === selectedType)?.name)}
             </Badge>
           )}
           {dateFrom && (

@@ -15,8 +15,8 @@ export default function MovementsPagination({
   }
 
   return (
-    <div className="flex items-center justify-between">
-      <div className="flex items-center space-x-2">
+    <div className="flex items-center justify-between flex-wrap-reverse gap-3 pt-3 pb-8">
+      <div className="flex items-center space-x-2 flex-wrap gap-2">
         <Button
           variant="outline"
           size="sm"

@@ -2,9 +2,11 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { formatDate, formatMoney } from "@/utils/formats";
+import { Button } from "@/components/ui/button";
+import { Edit, Trash2 } from "lucide-react";
+import { formatCapitalize, formatDate, formatMoney } from "@/utils/formats";
 
-export default function MovementsList({ movements }) {
+export default function MovementsList({ movements, onEdit, onDelete }) {
   if (movements.length === 0) {
     return (
       <Card>
@@ -27,26 +29,58 @@ export default function MovementsList({ movements }) {
           {movements.map((movement) => (
             <div
               key={movement.id}
-              className="flex items-center justify-between p-4 border-b last:border-b-0 hover:bg-gray-50 transition-colors"
+              className="flex items-center justify-between p-4 border-b last:border-b-0 hover:bg-gray-50 transition-colors flex-wrap"
             >
               <div className="flex-1">
                 <div className="flex items-center space-x-2 mb-1">
-                  <Badge variant="outline">{movement.category.name}</Badge>
-                  <Badge variant="secondary">{movement.type.name}</Badge>
+                  <Badge variant="outline">
+                    {formatCapitalize(movement.category.name)}
+                  </Badge>
+                  <Badge
+                    variant="secondary"
+                    className={
+                      "text-white " +
+                      (movement.type.name === "income"
+                        ? "bg-green-600"
+                        : "bg-red-600")
+                    }
+                  >
+                    {formatCapitalize(movement.type.name)}
+                  </Badge>
                 </div>
                 <p className="text-sm text-gray-600">{movement.description}</p>
                 <p className="text-xs text-gray-400">
                   {formatDate(movement.createdAt)}
                 </p>
               </div>
-              <div className="text-right">
-                <p
-                  className={`font-semibold ${
-                    movement.amount >= 0 ? "text-green-600" : "text-red-600"
-                  }`}
-                >
-                  {formatMoney(movement.amount)}
-                </p>
+              <div className="flex items-center gap-2">
+                <div className="text-right">
+                  <p
+                    className={`font-semibold ${
+                      movement.amount >= 0 ? "text-green-600" : "text-red-600"
+                    }`}
+                  >
+                    {formatMoney(movement.amount)}
+                  </p>
+                </div>
+                <div className="flex gap-1">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => onEdit && onEdit(movement)}
+                    className="h-8 w-8 p-0"
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => onDelete && onDelete(movement.id)}
+                    className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             </div>
           ))}

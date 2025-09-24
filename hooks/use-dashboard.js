@@ -6,8 +6,22 @@ export function useDashboardStats() {
     revalidateOnReconnect: true,
   });
 
+  const stats = data
+    ? {
+        ...data,
+        totalIncome: Number(data.totalIncome || 0),
+        totalExpenses: Number(data.totalExpenses || 0),
+      }
+    : {
+        totalIncome: 0,
+        totalExpenses: 0,
+        categoryStats: [],
+        monthlyStats: [],
+        totalMovements: 0,
+      };
+
   return {
-    stats: data || {},
+    stats,
     isLoading,
     error,
     mutate,

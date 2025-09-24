@@ -21,7 +21,7 @@ export default function CategoryChart({ data }) {
   const chartData = (data || [])
     .map((item, index) => ({
       category: item.category,
-      amount: Math.abs(item.amount),
+      amount: Math.abs(Number(item.amount)),
       fill: `var(--chart-${(index % 5) + 1})`,
     }))
     ?.slice(0, 10);

@@ -52,12 +52,6 @@ export default function MovementsFilters({
         <CardContent>
           <div className="text-center py-8">
             <p className="text-red-600 mb-2">Error loading filters</p>
-            <button
-              onClick={() => window.location.reload()}
-              className="text-blue-600 hover:underline"
-            >
-              Try again
-            </button>
           </div>
         </CardContent>
       </Card>
@@ -151,7 +145,6 @@ export default function MovementsFilters({
             <Button variant="outline" onClick={clearFilters}>
               Clear
             </Button>
-            <Button onClick={applyFilters}>Apply Filters</Button>
           </div>
         </CardContent>
       )}

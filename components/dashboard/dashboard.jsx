@@ -1,22 +1,21 @@
 "use client";
 
-import { useMemo } from "react";
-import {
-  Loader2,
-  DollarSign,
-  TrendingUp,
-  TrendingDown,
-  Target,
-} from "lucide-react";
+import { useMemo, useState } from "react";
+import { Loader2 } from "lucide-react";
 import { useDashboardStats } from "@/hooks/use-dashboard";
-import CardDashboard from "./card-dashboard";
+import { movementCrudService } from "@/services/movement-crud-service";
+import TotalBalanceCard from "./total-balance-card";
+import AsesoriaCard from "./asesoria-card";
 import CategoryChart from "./category-chart";
 import TimelineChart from "./timeline-chart";
 import TimelineBarChart from "./timeline-bar-chart";
-import { formatCapitalize } from "@/utils/formats";
 import CategoryBarChart from "./category-chart-bar";
+import MovementModal from "../movements/movement-modal";
+import { mutate as mutateGeneral } from "swr";
+import { IncomeButton } from "../ui/income-button";
+import { ExpenseButton } from "../ui/expense-button";
 
-export default function Dashboard() {
+export default function Dashboard({ user }) {
   const {
     stats: dashboardData,
     isLoading,
@@ -24,51 +23,36 @@ export default function Dashboard() {
     mutate,
   } = useDashboardStats();
 
+  const [showModal, setShowModal] = useState(false);
+  const [preSelectedType, setPreSelectedType] = useState(null);
+
+  const handleCreateMovement = async (movementData) => {
+    try {
+      await movementCrudService.createMovement(movementData);
+      mutate();
+      mutateGeneral("/api/dashboard/stats");
+    } catch (error) {
+      console.error("Error creating movement:", error);
+      alert("Error creating movement: " + error.message);
+    }
+  };
+
+  const openCreateModal = (typeName = null) => {
+    setPreSelectedType(typeName);
+    setShowModal(true);
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+    setPreSelectedType(null);
+  };
+
   const colorTimeline = useMemo(() => {
     if (!dashboardData) return "text-gray-600";
-    return dashboardData.totalEarned + dashboardData.totalExpenses > 0
+    return dashboardData.totalIncome + dashboardData.totalExpenses > 0
       ? "#00A63D"
       : "#E7000B";
   }, [dashboardData]);
-
-  const dashboardCards = useMemo(
-    () =>
-      dashboardData && [
-        {
-          title: "Total Balance",
-          amount: dashboardData.totalEarned + dashboardData.totalExpenses,
-          description: "Summary of your balance",
-          icon: DollarSign,
-          color: "text-gray-600",
-        },
-        {
-          title: "Total Earned",
-          amount: dashboardData.totalEarned,
-          description: "Sum of your earnings",
-          icon: TrendingUp,
-          color: "text-green-600",
-        },
-        {
-          title: "Total Expenses",
-          amount: Math.abs(dashboardData.totalExpenses),
-          description: "Sum of your expenses",
-          icon: TrendingDown,
-          color: "text-red-600",
-        },
-        {
-          title: "Top spending category",
-          amount: dashboardData.topSpendingCategory
-            ? Math.abs(dashboardData.topSpendingCategory.amount)
-            : 0,
-          description: dashboardData.topSpendingCategory
-            ? formatCapitalize(dashboardData.topSpendingCategory.category)
-            : "No data",
-          icon: Target,
-          color: "text-orange-600",
-        },
-      ],
-    [dashboardData]
-  );
 
   if (isLoading) {
     return (
@@ -102,25 +86,36 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {dashboardCards.map((card, index) => (
-          <CardDashboard
-            key={index}
-            title={card.title}
-            amount={card.amount}
-            description={card.description}
-            icon={card.icon}
-            color={card.color}
-          />
-        ))}
+      <div className="flex justify-between items-end">
+        <div className="flex items-end justify-between flex-wrap gap-4">
+          <p className="text-gray-600">
+            Welcome back, <strong>{user?.username}</strong>.
+          </p>
+        </div>
+        <div className="flex gap-2">
+          <IncomeButton onClick={() => openCreateModal("income")} />
+          <ExpenseButton onClick={() => openCreateModal("expense")} />
+        </div>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">
+        <TotalBalanceCard
+          incomes={dashboardData.totalIncome}
+          expenses={dashboardData.totalExpenses}
+          total={dashboardData.totalIncome - dashboardData.totalExpenses}
+        />
+
+        <div>
+          <AsesoriaCard />
+        </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
         <div className="hidden md:block">
-          <CategoryChart data={dashboardData.categoryStats} />
+          <CategoryChart data={dashboardData.categoryData} />
         </div>
         <div className="block md:hidden">
-          <CategoryBarChart data={dashboardData.categoryStats} />
+          <CategoryBarChart data={dashboardData.categoryData} />
         </div>
         <div className="hidden md:block">
           <TimelineChart
@@ -135,6 +130,13 @@ export default function Dashboard() {
           />
         </div>
       </div>
+
+      <MovementModal
+        isOpen={showModal}
+        onClose={closeModal}
+        onSave={handleCreateMovement}
+        preSelectedType={preSelectedType}
+      />
     </div>
   );
 }

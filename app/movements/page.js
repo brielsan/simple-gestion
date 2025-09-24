@@ -14,12 +14,9 @@ export default async function Movements() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header user={user} />
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+        <div>
           <h1 className="text-3xl font-bold text-gray-900">Movements</h1>
-          <p className="mt-2 text-gray-600">
-            Manage and filter all your financial movements
-          </p>
         </div>
 
         <Suspense

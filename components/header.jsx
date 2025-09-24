@@ -15,7 +15,6 @@ import {
   Upload,
   Home,
   TrendingUp,
-  Bot,
   Menu,
   X,
 } from "lucide-react";
@@ -127,19 +126,11 @@ export default function Header({ user }) {
                 <TrendingUp className="h-4 w-4" />
                 <span>Movements</span>
               </button>
-
-              <button
-                onClick={() => handleNavigation("/asesoria")}
-                className={getNavButtonClasses("/asesoria")}
-              >
-                <Bot className="h-4 w-4" />
-                <span>AsesorIA</span>
-              </button>
             </nav>
           </div>
 
           <div className="flex items-center space-x-4">
-            <span className="text-sm text-gray-700">
+            <span className="text-sm text-gray-700 sm:block hidden">
               Welcome, {user?.username}
             </span>
 
@@ -199,14 +190,6 @@ export default function Header({ user }) {
             >
               <TrendingUp className="h-4 w-4" />
               <span>Movements</span>
-            </button>
-
-            <button
-              onClick={() => handleNavigation("/asesoria")}
-              className={getMobileNavButtonClasses("/asesoria")}
-            >
-              <Bot className="h-4 w-4" />
-              <span>AsesorIA</span>
             </button>
           </div>
         </div>

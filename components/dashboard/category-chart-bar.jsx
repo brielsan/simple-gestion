@@ -27,7 +27,7 @@ export default function CategoryBarChart({ data }) {
   const chartData = (data || [])
     .map((item, index) => ({
       ...item,
-      amount: Math.abs(item.amount),
+      amount: Math.abs(Number(item.amount)),
       fill: `var(--chart-${(index % 5) + 1})`,
     }))
     ?.slice(0, 5);
