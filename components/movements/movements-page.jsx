@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { Loader2, Plus, TrendingUp, TrendingDown } from "lucide-react";
 import { useMovements } from "@/hooks/use-movements";
-import { movementCrudService } from "@/services/movement-crud-service";
+import { movementCrudService } from "@/services/client/movement-crud-service";
 import { Button } from "@/components/ui/button";
 import MovementsFilters from "./movements-filters";
 import MovementsList from "./movements-list";

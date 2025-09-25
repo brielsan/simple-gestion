@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { useDashboardStats } from "@/hooks/use-dashboard";
-import { movementCrudService } from "@/services/movement-crud-service";
+import { movementCrudService } from "@/services/client/movement-crud-service";
 import TotalBalanceCard from "./total-balance-card";
 import AsesoriaCard from "./asesoria-card";
 import CategoryChart from "./category-chart";
