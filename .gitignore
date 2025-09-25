@@ -42,3 +42,5 @@ next-env.d.ts
 
 .cursor
 /lib/generated/prisma
+
+app.zip
