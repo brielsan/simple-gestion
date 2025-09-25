@@ -1,3 +1,3 @@
 #!/bin/bash
-echo "Saltando npm install"
+echo "no npm install, using node_modules and .next from zip"
 exit 0

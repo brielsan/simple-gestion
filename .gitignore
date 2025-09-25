@@ -44,3 +44,8 @@ next-env.d.ts
 /lib/generated/prisma
 
 app.zip
+
+deploy
+
+build-elastic.sh
+docker-build-elastic.sh

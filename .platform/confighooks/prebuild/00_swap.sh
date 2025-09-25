@@ -22,9 +22,9 @@ if ! already_active; then
   sysctl -w vm.swappiness=60
   sysctl -w vm.vfs_cache_pressure=50
 else
-  echo "Swap ya activo en $SWAPFILE"
+  echo "Swap $SWAPFILE"
 fi
 
-echo "Swap listo:"
+echo "ready swap:"
 swapon --show || true
 free -h || true
