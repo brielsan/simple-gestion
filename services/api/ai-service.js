@@ -10,11 +10,27 @@ export const aiService = {
       });
 
       if (lastAdvice) {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+
+        const todayAdvicesCount = await prisma.advice.count({
+          where: {
+            userId,
+            createdAt: {
+              gte: today,
+              lt: tomorrow,
+            },
+          },
+        });
+
         return {
           success: true,
           data: {
             advice: lastAdvice.content,
             createdAt: lastAdvice.createdAt,
+            remainingAdvices: Math.max(0, 5 - todayAdvicesCount),
           },
         };
       }
@@ -34,6 +50,29 @@ export const aiService = {
   async createAdvice(user) {
     const userId = user.id;
     try {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+
+      const todayAdvicesCount = await prisma.advice.count({
+        where: {
+          userId,
+          createdAt: {
+            gte: today,
+            lt: tomorrow,
+          },
+        },
+      });
+
+      if (todayAdvicesCount >= 5) {
+        return {
+          success: false,
+          message:
+            "You have reached the limit of 5 advices per day. Try again tomorrow.",
+          status: 429,
+        };
+      }
       const totalIncome = await prisma.movement.aggregate({
         where: { userId, deleted: false, amount: { gt: 0 } },
         _sum: { amount: true },
@@ -119,11 +158,14 @@ User data:
         },
       });
 
+      const remainingAdvices = Math.max(0, 5 - (todayAdvicesCount + 1));
+
       return {
         success: true,
         data: {
           advice: newAdvice.content,
           createdAt: newAdvice.createdAt,
+          remainingAdvices,
         },
       };
     } catch (error) {

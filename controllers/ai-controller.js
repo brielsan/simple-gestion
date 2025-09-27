@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { aiService } from "@/services/ai-service.js";
+import { aiService } from "@/services/api/ai-service.js";
 import { getCurrentUser } from "@/lib/auth.js";
 
 export const AiController = {
