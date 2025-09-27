@@ -1,10 +1,7 @@
 import useSWR from "swr";
 
 export function useDashboardStats() {
-  const { data, error, isLoading, mutate } = useSWR("/api/dashboard/stats", {
-    revalidateOnFocus: true,
-    revalidateOnReconnect: true,
-  });
+  const { data, error, isLoading, mutate } = useSWR("/api/dashboard/stats");
 
   const stats = data
     ? {

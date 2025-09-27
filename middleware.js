@@ -16,10 +16,9 @@ export function middleware(request) {
     return NextResponse.next();
   }
 
-  const userCookie = request.cookies.get("user");
+  const authToken = request.cookies.get("auth-token");
 
-  if (!userCookie) {
-    // si no hay cookie de usuario (y no es una ruta publica): redirigir a login
+  if (!authToken) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 

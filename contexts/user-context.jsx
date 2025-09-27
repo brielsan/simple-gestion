@@ -3,6 +3,8 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useParameters } from "./parameters-context";
+import { mutate } from "swr";
+import { useSWRConfig } from "swr";
 
 const UserContext = createContext({
   user: null,
@@ -20,7 +22,7 @@ export function UserProvider({ children }) {
   const router = useRouter();
   const pathname = usePathname();
   const { loadParameters } = useParameters();
-
+  const { mutate } = useSWRConfig();
   const checkAuth = async () => {
     try {
       setIsLoading(true);
@@ -28,6 +30,10 @@ export function UserProvider({ children }) {
       const response = await fetch("/api/auth/me", {
         method: "GET",
         credentials: "include",
+        headers: {
+          "Cache-Control": "no-cache",
+          Pragma: "no-cache",
+        },
       });
 
       if (response.ok) {
@@ -64,13 +70,21 @@ export function UserProvider({ children }) {
       await fetch("/api/auth/logout", {
         method: "POST",
         credentials: "include",
+        headers: {
+          "Cache-Control": "no-cache",
+          Pragma: "no-cache",
+        },
       });
+
+      mutate((key) => true, undefined, { revalidate: false });
     } catch (error) {
       console.error("Error during logout:", error);
     } finally {
       setUser(null);
       setIsAuthenticated(false);
       router.push("/login");
+
+      window?.location?.reload();
     }
   };
 

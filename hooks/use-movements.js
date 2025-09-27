@@ -39,11 +39,7 @@ export function useMovements(filters = {}) {
 
   const { data, error, isLoading, mutate } = useSWR(
     ["/api/movements", params],
-    ([url, params]) => fetcherWithParams(url, params),
-    {
-      revalidateOnFocus: false,
-      revalidateOnReconnect: true,
-    }
+    ([url, params]) => fetcherWithParams(url, params)
   );
 
   return {
