@@ -1,21 +1,17 @@
-import { getCurrentUser } from "@/lib/auth";
+"use client";
+
 import Header from "@/components/header";
 import Dashboard from "@/components/dashboard/dashboard";
-import { Button } from "@/components/ui/button";
-import { Plus, DollarSign, CreditCard } from "lucide-react";
+import ProtectedRoute from "@/components/auth/protected-route";
+import { useAuth } from "@/contexts/user-context";
+import { redirect } from "next/navigation";
 
-export default async function Home() {
-  const user = await getCurrentUser();
+export default function Index() {
+  const { user } = useAuth();
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <Header user={user} />
-
-      <main className="max-w-7xl mx-auto pb-6 sm:px-6 lg:px-8">
-        <div className="px-4 py-6 sm:px-0">
-          <Dashboard user={user} />
-        </div>
-      </main>
-    </div>
-  );
+  if (user) {
+    redirect("/dashboard");
+  } else {
+    redirect("/login");
+  }
 }

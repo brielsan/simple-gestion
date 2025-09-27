@@ -13,6 +13,8 @@ import { IncomeButton } from "../ui/income-button";
 import { ExpenseButton } from "../ui/expense-button";
 import dynamic from "next/dynamic";
 import Loader from "../ui/loader";
+import { Alert } from "@/utils/alerts";
+import { useAuth } from "@/contexts/user-context";
 
 const CategoryChart = dynamic(() => import("./category-chart"), {
   ssr: false,
@@ -35,7 +37,9 @@ const MovementModal = dynamic(() => import("../movements/movement-modal"), {
   loading: () => <Loader />,
 });
 
-export default function Dashboard({ user }) {
+export default function Dashboard() {
+  const { user } = useAuth();
+
   const [timelinePeriod, setTimelinePeriod] = useState("months");
 
   const {
@@ -58,15 +62,18 @@ export default function Dashboard({ user }) {
   const handleCreateMovement = async (movementData) => {
     try {
       await movementCrudService.createMovement(movementData);
-      mutateGeneral(
-        (key) => typeof key === "string" && key.startsWith("/api/dashboard")
-      );
-      mutateGeneral(
-        (key) => typeof key === "string" && key.startsWith("/api/movements")
-      );
+      mutate();
+      mutateTimeline();
+      mutateGeneral((key) => {
+        if (Array.isArray(key)) {
+          return key.some((k) => k?.[0]?.startsWith("/api/movements"));
+        }
+        return key?.startsWith("/api/movements") && key;
+      });
+      mutateGeneral("/api/ai/advice");
     } catch (error) {
       console.error("Error creating movement:", error);
-      alert("Error creating movement: " + error.message);
+      Alert("Error", "Error creating movement: " + error.message, "error");
     }
   };
 
@@ -115,7 +122,7 @@ export default function Dashboard({ user }) {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-end">
+      <div className="flex justify-between items-end flex-wrap gap-4">
         <div className="flex items-end justify-between flex-wrap gap-4">
           <p className="text-gray-600">
             Welcome back, <strong>{user?.username}</strong>.

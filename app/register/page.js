@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
+import { useAuth } from "@/contexts/user-context";
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
@@ -18,7 +19,7 @@ export default function RegisterPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
-
+  const { login } = useAuth();
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -56,8 +57,6 @@ export default function RegisterPage() {
         }),
       });
 
-      const data = await response.json();
-
       if (response.ok) {
         const loginResponse = await fetch("/api/auth/login", {
           method: "POST",
@@ -70,14 +69,16 @@ export default function RegisterPage() {
           }),
         });
 
+        const loginData = await loginResponse.json();
+
         if (loginResponse.ok) {
-          router.push("/");
-          router.refresh();
+          login(loginData.user);
+          router.push("/dashboard");
         } else {
-          router.push("/login");
+          setError(loginData.error || "Error starting session");
         }
       } else {
-        setError(data.error || "Error registering user");
+        setError(loginData.error || "Error registering user");
       }
     } catch (error) {
       setError("Connection error");

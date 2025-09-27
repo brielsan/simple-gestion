@@ -1,3 +1,4 @@
+import { getCurrentUser } from "@/lib/auth.js";
 import { createUser, authenticateUser } from "./auth.js";
 import { prisma } from "@/db/client.js";
 
@@ -81,6 +82,49 @@ export const authService = {
       };
     } catch (error) {
       console.error("Error in logout service:", error);
+      return {
+        success: false,
+        message: "Internal server error",
+        status: 500,
+      };
+    }
+  },
+
+  async getCurrentUser() {
+    try {
+      const user = await getCurrentUser();
+
+      if (!user) {
+        return {
+          success: false,
+          message: "Not authenticated",
+          status: 401,
+        };
+      }
+
+      const dbUser = await prisma.user.findUnique({
+        where: { id: user.id },
+        select: {
+          id: true,
+          email: true,
+          username: true,
+        },
+      });
+
+      if (!dbUser) {
+        return {
+          success: false,
+          message: "User not found",
+          status: 401,
+        };
+      }
+
+      return {
+        success: true,
+        data: dbUser,
+      };
+    } catch (error) {
+      console.error("Error in getCurrentUser service:", error);
       return {
         success: false,
         message: "Internal server error",
