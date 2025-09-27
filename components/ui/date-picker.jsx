@@ -11,16 +11,28 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/cn";
 
-export function DatePicker({ date, setDate, placeholder = "Select date" }) {
+export function DatePicker({
+  date,
+  setDate,
+  placeholder = "Select date",
+  height = "43px",
+}) {
+  const [open, setOpen] = useState(false);
+
+  const handleDateSelect = (selectedDate) => {
+    setDate(selectedDate);
+    setOpen(false);
+  };
+
   return (
-    <Popover>
+    <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
           variant="outline"
           className={cn(
-            "w-full justify-start text-left font-normal h-[43px]",
+            `w-full justify-start text-left font-normal h-[${height}]`,
             !date && "text-muted-foreground"
           )}
         >
@@ -32,7 +44,7 @@ export function DatePicker({ date, setDate, placeholder = "Select date" }) {
         <Calendar
           mode="single"
           selected={date}
-          onSelect={setDate}
+          onSelect={handleDateSelect}
           initialFocus
           locale={enUS}
         />
