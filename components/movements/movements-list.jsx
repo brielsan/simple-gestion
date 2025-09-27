@@ -67,7 +67,7 @@ export default function MovementsList({
                 </div>
                 <p className="text-sm text-gray-600">{movement.description}</p>
                 <p className="text-xs text-gray-400">
-                  {formatDate(movement.createdAt)}
+                  {formatDate(movement.date)}
                 </p>
               </div>
               <div className="flex items-center gap-2">

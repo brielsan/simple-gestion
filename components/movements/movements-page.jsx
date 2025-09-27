@@ -1,10 +1,8 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
-import { Loader2, Plus, TrendingUp, TrendingDown } from "lucide-react";
 import { useMovements } from "@/hooks/use-movements";
 import { movementCrudService } from "@/services/client/movement-crud-service";
-import { Button } from "@/components/ui/button";
 import MovementsFilters from "./movements-filters";
 import MovementsPagination from "./movements-pagination";
 import MovementsInfo from "./movements-info";
@@ -15,6 +13,7 @@ import { IncomeButton } from "../ui/income-button";
 import { ExpenseButton } from "../ui/expense-button";
 import dynamic from "next/dynamic";
 import Loader from "../ui/loader";
+import { Alert, Confirm } from "@/utils/alerts";
 
 const MovementsList = dynamic(() => import("./movements-list"), {
   ssr: false,
@@ -65,12 +64,22 @@ export default function MovementsPage() {
   };
 
   const refreshData = () => {
-    mutateGeneral(
-      (key) => typeof key === "string" && key.startsWith("/api/dashboard")
-    );
-    mutateGeneral(
-      (key) => typeof key === "string" && key.startsWith("/api/movements")
-    );
+    mutate();
+
+    mutateGeneral("/api/dashboard/stats");
+    mutateGeneral((key) => {
+      if (Array.isArray(key)) {
+        return key.some((k) => k?.[0]?.startsWith("/api/dashboard/timeline"));
+      }
+      return key?.startsWith("/api/dashboard/timeline") && key;
+    });
+    mutateGeneral("/api/ai/advice");
+    mutateGeneral((key) => {
+      if (Array.isArray(key)) {
+        return key.some((k) => k?.[0]?.startsWith("/api/movements"));
+      }
+      return key?.startsWith("/api/movements") && key;
+    });
   };
 
   const handleCreateMovement = async (movementData) => {
@@ -79,7 +88,8 @@ export default function MovementsPage() {
       refreshData();
     } catch (error) {
       console.error("Error creating movement:", error);
-      alert("Error creating movement: " + error.message);
+
+      Alert("Error", "Error creating movement: " + error.message, "error");
     }
   };
 
@@ -89,19 +99,25 @@ export default function MovementsPage() {
       refreshData();
     } catch (error) {
       console.error("Error updating movement:", error);
-      alert("Error updating movement: " + error.message);
+      Alert("Error", "Error updating movement: " + error.message, "error");
     }
   };
 
   const handleDeleteMovement = async (movementId) => {
     try {
-      if (confirm("Are you sure you want to delete this movement?")) {
+      if (
+        await Confirm(
+          "Delete Movement",
+          "Are you sure you want to delete this movement?",
+          "warning"
+        )
+      ) {
         await movementCrudService.deleteMovement(movementId);
       }
       refreshData();
     } catch (error) {
       console.error("Error deleting movement:", error);
-      alert("Error deleting movement: " + error.message);
+      Alert("Error", "Error deleting movement: " + error.message, "error");
     }
   };
 
@@ -162,22 +178,24 @@ export default function MovementsPage() {
         </div>
       </div>
 
-      <MovementsFilters
-        selectedCategory={selectedCategory}
-        setSelectedCategory={setSelectedCategory}
-        selectedType={selectedType}
-        setSelectedType={setSelectedType}
-        dateFrom={dateFrom}
-        setDateFrom={setDateFrom}
-        dateTo={dateTo}
-        setDateTo={setDateTo}
-        description={description}
-        setDescription={setDescription}
-        showFilters={showFilters}
-        setShowFilters={setShowFilters}
-        applyFilters={applyFilters}
-        clearFilters={clearFilters}
-      />
+      {!(!hasFilters && !totalAmount) && (
+        <MovementsFilters
+          selectedCategory={selectedCategory}
+          setSelectedCategory={setSelectedCategory}
+          selectedType={selectedType}
+          setSelectedType={setSelectedType}
+          dateFrom={dateFrom}
+          setDateFrom={setDateFrom}
+          dateTo={dateTo}
+          setDateTo={setDateTo}
+          description={description}
+          setDescription={setDescription}
+          showFilters={showFilters}
+          setShowFilters={setShowFilters}
+          applyFilters={applyFilters}
+          clearFilters={clearFilters}
+        />
+      )}
 
       {!isLoading && !error && (
         <MovementsSummary
