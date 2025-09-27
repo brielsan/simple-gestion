@@ -20,20 +20,30 @@ export const formatDate = (date) => {
 
 export const formatTimelineDate = (date, period) => {
   const dateObj = new Date(date);
+
+  const utcDate = new Date(
+    dateObj.getUTCFullYear(),
+    dateObj.getUTCMonth(),
+    dateObj.getUTCDate()
+  );
+
   switch (period) {
     case "weeks":
-      return dateObj.toLocaleDateString("en-US", {
+      return utcDate.toLocaleDateString("en-US", {
         month: "short",
         day: "numeric",
+        timeZone: "UTC",
       });
     case "days":
-      return dateObj.toLocaleDateString("en-US", {
+      return utcDate.toLocaleDateString("en-US", {
         month: "short",
         day: "numeric",
+        timeZone: "UTC",
       });
     default:
-      return dateObj.toLocaleDateString("en-US", {
+      return utcDate.toLocaleDateString("en-US", {
         month: "short",
+        timeZone: "UTC",
       });
   }
 };

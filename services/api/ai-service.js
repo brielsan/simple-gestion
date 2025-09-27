@@ -22,6 +22,7 @@ export const aiService = {
               gte: today,
               lt: tomorrow,
             },
+            isSystemGenerated: false,
           },
         });
 
@@ -47,7 +48,7 @@ export const aiService = {
     }
   },
 
-  async createAdvice(user) {
+  async createAdvice(user, isSystemGenerated = true) {
     const userId = user.id;
     try {
       const today = new Date();
@@ -62,6 +63,7 @@ export const aiService = {
             gte: today,
             lt: tomorrow,
           },
+          isSystemGenerated: false,
         },
       });
 
@@ -82,6 +84,17 @@ export const aiService = {
         where: { userId, deleted: false, amount: { lt: 0 } },
         _sum: { amount: true },
       });
+
+      if (!totalIncome._sum.amount || !totalExpenses._sum.amount) {
+        return {
+          success: true,
+          data: {
+            advice: `No data available yet
+Keeping track of your income and expenses is the first step toward better financial habits. Right now, there are no transactions to analyze, so we can’t generate personalized advice yet.
+Whenever you add new data, just click the “Refresh” button to update the information instantly and get your first financial insights.`,
+          },
+        };
+      }
 
       const categoryData = await prisma.$queryRaw`
         SELECT 
@@ -146,19 +159,30 @@ User data:
       });
 
       const data = await response.json();
-      const advice =
-        data?.candidates?.[0]?.content?.parts?.[0]?.text ||
-        "Could not generate advice.";
+
+      let advice = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+
+      if (!advice) {
+        return {
+          success: false,
+          message: data?.error?.message
+            ? `(Gemini Error) ${data?.error?.message}`
+            : "Could not generate advice. Please try again later.",
+          status: 500,
+        };
+      }
 
       const newAdvice = await prisma.advice.create({
         data: {
           userId,
           content: advice,
-          isSystemGenerated: true,
+          isSystemGenerated,
         },
       });
 
-      const remainingAdvices = Math.max(0, 5 - (todayAdvicesCount + 1));
+      const remainingAdvices = isSystemGenerated
+        ? todayAdvicesCount
+        : Math.max(0, 5 - (todayAdvicesCount + 1));
 
       return {
         success: true,

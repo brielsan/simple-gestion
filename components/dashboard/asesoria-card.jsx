@@ -33,6 +33,11 @@ export default function AsesoriaCard() {
     [data]
   );
 
+  const noData = useMemo(
+    () => !isLoading && data?.advice?.includes("No data available yet"),
+    [isLoading, data]
+  );
+
   return (
     <Card className="w-full h-full">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 flex-wrap gap-2">
@@ -41,37 +46,39 @@ export default function AsesoriaCard() {
             AsesorIA <Bot className="h-4 w-4" />
           </CardTitle>
           <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
-            Tips of the day {formatDate(data?.createdAt)}
+            Tips of the day {data?.createdAt ? formatDate(data?.createdAt) : ""}
           </p>
         </div>
-        <div className="flex items-center">
-          <div className="flex items-center gap-3">
-            {" "}
-            <span
-              className={`text-xs ${
-                isLimitReached ? "text-red-500" : "text-muted-foreground"
-              }`}
-            >
-              You have {data?.remainingAdvices || 0} advices remaining
-            </span>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleRefresh}
-              disabled={isRefreshing || isLimitReached}
-              className="h-8 w-8 p-0"
-              title={
-                isLimitReached
-                  ? "You have reached the limit of 5 advices per day. Try again tomorrow."
-                  : "Generate new advice"
-              }
-            >
-              <RefreshCw
-                className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`}
-              />
-            </Button>
+        {!isLoading && !noData && (
+          <div className="flex items-center">
+            <div className="flex items-center gap-3">
+              {" "}
+              <span
+                className={`text-xs ${
+                  isLimitReached ? "text-red-500" : "text-muted-foreground"
+                }`}
+              >
+                You have {data?.remainingAdvices || 0} advices remaining
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleRefresh}
+                disabled={isRefreshing || isLimitReached}
+                className="h-8 w-8 p-0 cursor-pointer"
+                title={
+                  isLimitReached
+                    ? "You have reached the limit of 5 advices per day. Try again tomorrow."
+                    : "Generate new advice"
+                }
+              >
+                <RefreshCw
+                  className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`}
+                />
+              </Button>
+            </div>
           </div>
-        </div>
+        )}
       </CardHeader>
       {isLoading ? (
         <Loader />

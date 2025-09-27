@@ -29,14 +29,14 @@ export const AiController = {
     }
   },
 
-  async createAdvice() {
+  async createAdvice(req, res, isSystemGenerated = false) {
     try {
       const user = await getCurrentUser();
       if (!user) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
       }
 
-      const result = await aiService.createAdvice(user);
+      const result = await aiService.createAdvice(user, isSystemGenerated);
 
       if (!result.success) {
         return NextResponse.json(
