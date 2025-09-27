@@ -28,14 +28,14 @@ export const movementsService = {
       }
 
       if (dateFrom || dateTo) {
-        where.createdAt = {};
+        where.date = {};
         if (dateFrom) {
-          where.createdAt.gte = new Date(dateFrom);
+          where.date.gte = new Date(dateFrom);
         }
         if (dateTo) {
           const endDate = new Date(dateTo);
           endDate.setHours(23, 59, 59, 999);
-          where.createdAt.lte = endDate;
+          where.date.lte = endDate;
         }
       }
 
@@ -47,7 +47,7 @@ export const movementsService = {
             type: true,
           },
           orderBy: {
-            createdAt: "desc",
+            date: "desc",
           },
           skip,
           take: limit,
@@ -97,7 +97,14 @@ export const movementsService = {
 
   async createMovement(userId, movementData) {
     try {
-      const { description, amount, categoryId, typeId } = movementData;
+      const { description, amount, categoryId, typeId, date } = movementData;
+
+      let movementDate;
+      if (date) {
+        movementDate = new Date(date + "T00:00:00.000Z");
+      } else {
+        movementDate = new Date();
+      }
 
       const movement = await prisma.movement.create({
         data: {
@@ -106,6 +113,7 @@ export const movementsService = {
           categoryId,
           typeId,
           userId,
+          date: movementDate,
         },
         include: {
           category: true,
@@ -129,7 +137,7 @@ export const movementsService = {
 
   async updateMovement(userId, movementId, movementData) {
     try {
-      const { description, amount, categoryId, typeId } = movementData;
+      const { description, amount, categoryId, typeId, date } = movementData;
 
       const existingMovement = await prisma.movement.findFirst({
         where: {
@@ -147,6 +155,13 @@ export const movementsService = {
         };
       }
 
+      let movementDate;
+      if (date) {
+        movementDate = new Date(date + "T00:00:00.000Z");
+      } else {
+        movementDate = existingMovement.date;
+      }
+
       const movement = await prisma.movement.update({
         where: { id: movementId },
         data: {
@@ -154,6 +169,7 @@ export const movementsService = {
           amount,
           categoryId,
           typeId,
+          date: movementDate,
         },
         include: {
           category: true,

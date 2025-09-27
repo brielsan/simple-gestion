@@ -53,7 +53,7 @@ export async function POST() {
           userId: user.id,
           categoryId: categoryId,
           typeId: typeId,
-          createdAt: item.date ? new Date(item.date) : new Date(),
+          date: item.date ? new Date(item.date) : new Date(),
         });
       }
     }

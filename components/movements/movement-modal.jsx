@@ -5,8 +5,10 @@ import { Plus, Edit, Trash2, ChevronDown, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { DatePicker } from "@/components/ui/date-picker";
 import { useParameters } from "@/contexts/parameters-context";
 import { formatMoney } from "@/utils/formats";
+import { Confirm } from "@/utils/alerts";
 
 export default function MovementModal({
   isOpen,
@@ -23,6 +25,7 @@ export default function MovementModal({
     amount: "",
     categoryId: "",
     typeId: "",
+    date: new Date(),
   });
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({});
@@ -61,6 +64,7 @@ export default function MovementModal({
         amount: displayAmount,
         categoryId: movement.categoryId || "",
         typeId: movement.typeId || "",
+        date: movement.date ? new Date(movement.date) : new Date(),
       });
     } else {
       const preSelectedTypeId = preSelectedType
@@ -72,6 +76,7 @@ export default function MovementModal({
         amount: "",
         categoryId: "",
         typeId: preSelectedTypeId,
+        date: new Date(),
       });
     }
     setErrors({});
@@ -94,6 +99,10 @@ export default function MovementModal({
 
     if (!formData.typeId) {
       newErrors.typeId = "Type is required";
+    }
+
+    if (!formData.date) {
+      newErrors.date = "Date is required";
     }
 
     setErrors(newErrors);
@@ -119,9 +128,15 @@ export default function MovementModal({
           finalAmount = Math.abs(finalAmount);
         }
 
+        const year = formData.date.getFullYear();
+        const month = String(formData.date.getMonth() + 1).padStart(2, "0");
+        const day = String(formData.date.getDate()).padStart(2, "0");
+        const dateString = `${year}-${month}-${day}`;
+
         const movementData = {
           ...formData,
           amount: finalAmount,
+          date: dateString,
         };
 
         if (isEdit) {
@@ -143,7 +158,13 @@ export default function MovementModal({
   const handleDelete = useCallback(async () => {
     if (!movement || !onDelete) return;
 
-    if (confirm("Are you sure you want to delete this movement?")) {
+    if (
+      await Confirm(
+        "Delete Movement",
+        "Are you sure you want to delete this movement?",
+        "warning"
+      )
+    ) {
       setIsLoading(true);
       try {
         await onDelete(movement.id);
@@ -180,13 +201,12 @@ export default function MovementModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      {/* Overlay */}
       <div className="fixed inset-0 bg-black/50" onClick={onClose} />
-
-      {/* Modal */}
       <Card className="relative z-50 w-full max-w-md mx-4">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className={`flex items-center gap-2 ${theme.header}`}>
+        <CardHeader className="flex flex-row items-center justify-between position-relative">
+          <CardTitle
+            className={`flex items-center justify-center gap-2 ${theme.header} w-full pb-3`}
+          >
             {isEdit ? (
               <>
                 <Edit className="h-5 w-5" />
@@ -200,7 +220,7 @@ export default function MovementModal({
             variant="ghost"
             size="sm"
             onClick={onClose}
-            className="h-8 w-8 p-0"
+            className="h-8 w-8 p-0 absolute right-5"
           >
             <X className="h-4 w-4" />
           </Button>
@@ -208,6 +228,61 @@ export default function MovementModal({
 
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label
+                  htmlFor="date"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Date
+                </label>
+                <DatePicker
+                  date={formData.date}
+                  setDate={(date) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      date: date || new Date(),
+                    }))
+                  }
+                  placeholder="Select date"
+                />
+                {errors.date && (
+                  <p className="text-sm text-red-600">{errors.date}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <label
+                  htmlFor="amount"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Amount
+                </label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+                    $
+                  </span>
+                  <Input
+                    id="amount"
+                    type="number"
+                    step="0.01"
+                    value={formData.amount}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        amount: e.target.value,
+                      }))
+                    }
+                    placeholder="0.00"
+                    className={`pl-8 ${theme.border} ${theme.focus} h-[38px]`}
+                  />
+                </div>
+                {errors.amount && (
+                  <p className="text-sm text-red-600">{errors.amount}</p>
+                )}
+              </div>
+            </div>
+
             <div className="space-y-2">
               <label
                 htmlFor="description"
@@ -229,34 +304,6 @@ export default function MovementModal({
               />
               {errors.description && (
                 <p className="text-sm text-red-600">{errors.description}</p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <label
-                htmlFor="amount"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Amount
-              </label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
-                  $
-                </span>
-                <Input
-                  id="amount"
-                  type="number"
-                  step="0.01"
-                  value={formData.amount}
-                  onChange={(e) =>
-                    setFormData((prev) => ({ ...prev, amount: e.target.value }))
-                  }
-                  placeholder="0.00"
-                  className={`pl-8 ${theme.border} ${theme.focus}`}
-                />
-              </div>
-              {errors.amount && (
-                <p className="text-sm text-red-600">{errors.amount}</p>
               )}
             </div>
 
@@ -331,30 +378,6 @@ export default function MovementModal({
                 {errors.typeId && (
                   <p className="text-sm text-red-600">{errors.typeId}</p>
                 )}
-              </div>
-            )}
-
-            {formData.amount && (
-              <div
-                className={`p-3 rounded-lg ${
-                  isIncome
-                    ? "bg-green-50 border border-green-200"
-                    : "bg-red-50 border border-red-200"
-                }`}
-              >
-                <p className="text-sm text-gray-600">Preview:</p>
-                <p
-                  className={`font-semibold ${
-                    isIncome ? "text-green-700" : "text-red-700"
-                  }`}
-                >
-                  {(() => {
-                    const amount = parseFloat(formData.amount) || 0;
-                    // Para el preview, mostrar el signo correcto según el tipo
-                    const displayAmount = isIncome ? amount : -amount;
-                    return formatMoney(displayAmount);
-                  })()}
-                </p>
               </div>
             )}
 
