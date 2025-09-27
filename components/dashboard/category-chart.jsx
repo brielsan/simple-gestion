@@ -9,22 +9,26 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
-  ChartConfig,
   ChartContainer,
   ChartLegend,
   ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
+import { memo, useMemo } from "react";
 
-export default function CategoryChart({ data }) {
-  const chartData = (data || [])
-    .map((item, index) => ({
-      category: item.category,
-      amount: Math.abs(Number(item.amount)),
-      fill: `var(--chart-${(index % 5) + 1})`,
-    }))
-    ?.slice(0, 10);
+const CategoryChart = memo(({ data }) => {
+  const chartData = useMemo(
+    () =>
+      (data || [])
+        .map((item, index) => ({
+          category: item.category,
+          amount: Math.abs(Number(item.amount)),
+          fill: `var(--chart-${(index % 5) + 1})`,
+        }))
+        ?.slice(0, 10),
+    [data]
+  );
 
   const chartConfig = {
     amount: {
@@ -48,10 +52,10 @@ export default function CategoryChart({ data }) {
   return (
     <Card className="flex flex-col">
       <CardHeader className="items-center pb-0 text-center">
-        <CardTitle className="text-base sm:text-lg">
+        <CardTitle className="text-base sm:text-lg md:p-1.5 lg:p-0">
           Expenses by Category {chartData.length === 10 ? "(Top 10)" : ""}
         </CardTitle>
-        <CardDescription className="text-sm sm:text-base">
+        <CardDescription className="text-sm sm:text-base md:hidden lg:block">
           Distribution of expenses by category
         </CardDescription>
       </CardHeader>
@@ -76,4 +80,6 @@ export default function CategoryChart({ data }) {
       </CardContent>
     </Card>
   );
-}
+});
+
+export default CategoryChart;

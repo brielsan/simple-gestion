@@ -5,7 +5,6 @@ import * as RechartsPrimitive from "recharts";
 import { cn } from "@/lib/utils";
 import { formatCapitalize } from "@/utils/formats";
 
-// Format: { THEME_NAME: CSS_SELECTOR }
 const THEMES = {
   light: "",
   dark: ".dark",

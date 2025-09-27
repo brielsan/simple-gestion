@@ -3,7 +3,8 @@ import { prisma } from "@/db/client.js";
 export const movementsService = {
   async getMovements(userId, filters) {
     try {
-      const { page, limit, categoryId, typeId, dateFrom, dateTo } = filters;
+      const { page, limit, categoryId, typeId, dateFrom, dateTo, description } =
+        filters;
       const skip = (page - 1) * limit;
 
       const where = {
@@ -19,6 +20,13 @@ export const movementsService = {
         where.typeId = { equals: typeId };
       }
 
+      if (description && description.trim() !== "") {
+        where.description = {
+          startsWith: description,
+          mode: "insensitive",
+        };
+      }
+
       if (dateFrom || dateTo) {
         where.createdAt = {};
         if (dateFrom) {
@@ -31,7 +39,7 @@ export const movementsService = {
         }
       }
 
-      const [movements, totalMovements] = await Promise.all([
+      const [movements, aggregateData] = await Promise.all([
         prisma.movement.findMany({
           where,
           include: {
@@ -44,8 +52,19 @@ export const movementsService = {
           skip,
           take: limit,
         }),
-        prisma.movement.count({ where }),
+        prisma.movement.aggregate({
+          where,
+          _sum: {
+            amount: true,
+          },
+          _count: {
+            id: true,
+          },
+        }),
       ]);
+
+      const totalMovements = aggregateData._count.id;
+      const totalAmount = aggregateData._sum.amount || 0;
 
       const totalPages = Math.ceil(totalMovements / limit);
       const hasNextPage = page < totalPages;
@@ -63,6 +82,7 @@ export const movementsService = {
             hasPrevPage,
             limit,
           },
+          totalAmount,
         },
       };
     } catch (error) {

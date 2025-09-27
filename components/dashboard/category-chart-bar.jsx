@@ -22,15 +22,20 @@ import {
   LabelList,
   ResponsiveContainer,
 } from "recharts";
+import { memo, useMemo } from "react";
 
-export default function CategoryBarChart({ data }) {
-  const chartData = (data || [])
-    .map((item, index) => ({
-      ...item,
-      amount: Math.abs(Number(item.amount)),
-      fill: `var(--chart-${(index % 5) + 1})`,
-    }))
-    ?.slice(0, 5);
+const CategoryBarChart = memo(({ data }) => {
+  const chartData = useMemo(
+    () =>
+      (data || [])
+        .map((item, index) => ({
+          ...item,
+          amount: Math.abs(Number(item.amount)),
+          fill: `var(--chart-${(index % 5) + 1})`,
+        }))
+        ?.slice(0, 5),
+    [data]
+  );
 
   const chartConfig = {
     ...chartData.reduce((acc, item, index) => {
@@ -113,4 +118,6 @@ export default function CategoryBarChart({ data }) {
       </CardContent>
     </Card>
   );
-}
+});
+
+export default CategoryBarChart;

@@ -17,3 +17,23 @@ export const formatDate = (date) => {
     year: "numeric",
   });
 };
+
+export const formatTimelineDate = (date, period) => {
+  const dateObj = new Date(date);
+  switch (period) {
+    case "weeks":
+      return dateObj.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+      });
+    case "days":
+      return dateObj.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+      });
+    default:
+      return dateObj.toLocaleDateString("en-US", {
+        month: "short",
+      });
+  }
+};

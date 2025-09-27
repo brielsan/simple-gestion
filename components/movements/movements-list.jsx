@@ -3,10 +3,27 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Edit, Trash2 } from "lucide-react";
+import { Edit, Trash2, Loader2 } from "lucide-react";
 import { formatCapitalize, formatDate, formatMoney } from "@/utils/formats";
 
-export default function MovementsList({ movements, onEdit, onDelete }) {
+export default function MovementsList({
+  movements,
+  isLoading,
+  onEdit,
+  onDelete,
+}) {
+  if (isLoading) {
+    return (
+      <Card>
+        <CardContent className="p-0">
+          <div className="flex items-center justify-center h-64">
+            <Loader2 className="h-8 w-8 animate-spin" />
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   if (movements.length === 0) {
     return (
       <Card>

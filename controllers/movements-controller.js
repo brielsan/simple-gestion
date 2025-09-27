@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { movementsService } from "@/services/movements-service.js";
+import { movementsService } from "@/services/api/movements-service.js";
 import { getCurrentUser } from "@/lib/auth.js";
 
 export const MovementsController = {
@@ -11,13 +11,22 @@ export const MovementsController = {
       }
 
       const { searchParams } = new URL(request.url);
+      const page = parseInt(searchParams.get("page")) || 1;
+      const limit = parseInt(searchParams.get("limit")) || 20;
+      const categoryId = searchParams.get("categoryId");
+      const typeId = searchParams.get("typeId");
+      const dateFrom = searchParams.get("dateFrom");
+      const dateTo = searchParams.get("dateTo");
+      const description = searchParams.get("description");
+
       const filters = {
-        page: parseInt(searchParams.get("page")) || 1,
-        limit: parseInt(searchParams.get("limit")) || 20,
-        categoryId: searchParams.get("categoryId"),
-        typeId: searchParams.get("typeId"),
-        dateFrom: searchParams.get("dateFrom"),
-        dateTo: searchParams.get("dateTo"),
+        page,
+        limit,
+        categoryId,
+        typeId,
+        dateFrom: dateFrom ? new Date(dateFrom) : null,
+        dateTo: dateTo ? new Date(dateTo) : null,
+        description,
       };
 
       const result = await movementsService.getMovements(user.id, filters);
@@ -31,7 +40,7 @@ export const MovementsController = {
 
       return NextResponse.json(result.data);
     } catch (error) {
-      console.error("Error in getting movements:", error);
+      console.error("Error in getMovements:", error);
       return NextResponse.json(
         { error: "Internal server error" },
         { status: 500 }
@@ -41,11 +50,6 @@ export const MovementsController = {
 
   async getFilters() {
     try {
-      const user = await getCurrentUser();
-      if (!user) {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-      }
-
       const result = await movementsService.getFilters();
 
       if (!result.success) {
@@ -57,7 +61,7 @@ export const MovementsController = {
 
       return NextResponse.json(result.data);
     } catch (error) {
-      console.error("Error in getting filters:", error);
+      console.error("Error in getFilters:", error);
       return NextResponse.json(
         { error: "Internal server error" },
         { status: 500 }
@@ -72,22 +76,11 @@ export const MovementsController = {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
       }
 
-      const body = await request.json();
-      const { description, amount, categoryId, typeId } = body;
-
-      if (!description || !amount || !categoryId || !typeId) {
-        return NextResponse.json(
-          { error: "Missing required fields" },
-          { status: 400 }
-        );
-      }
-
-      const result = await movementsService.createMovement(user.id, {
-        description,
-        amount: parseFloat(amount),
-        categoryId,
-        typeId,
-      });
+      const movementData = await request.json();
+      const result = await movementsService.createMovement(
+        user.id,
+        movementData
+      );
 
       if (!result.success) {
         return NextResponse.json(
@@ -96,9 +89,9 @@ export const MovementsController = {
         );
       }
 
-      return NextResponse.json(result.data, { status: 201 });
+      return NextResponse.json(result.data);
     } catch (error) {
-      console.error("Error creating movement:", error);
+      console.error("Error in createMovement:", error);
       return NextResponse.json(
         { error: "Internal server error" },
         { status: 500 }
@@ -115,33 +108,12 @@ export const MovementsController = {
 
       const { searchParams } = new URL(request.url);
       const movementId = searchParams.get("id");
-
-      if (!movementId) {
-        return NextResponse.json(
-          { error: "Movement ID is required" },
-          { status: 400 }
-        );
-      }
-
-      const body = await request.json();
-      const { description, amount, categoryId, typeId } = body;
-
-      if (!description || !amount || !categoryId || !typeId) {
-        return NextResponse.json(
-          { error: "Missing required fields" },
-          { status: 400 }
-        );
-      }
+      const movementData = await request.json();
 
       const result = await movementsService.updateMovement(
         user.id,
         movementId,
-        {
-          description,
-          amount: parseFloat(amount),
-          categoryId,
-          typeId,
-        }
+        movementData
       );
 
       if (!result.success) {
@@ -153,7 +125,7 @@ export const MovementsController = {
 
       return NextResponse.json(result.data);
     } catch (error) {
-      console.error("Error updating movement:", error);
+      console.error("Error in updateMovement:", error);
       return NextResponse.json(
         { error: "Internal server error" },
         { status: 500 }
@@ -171,13 +143,6 @@ export const MovementsController = {
       const { searchParams } = new URL(request.url);
       const movementId = searchParams.get("id");
 
-      if (!movementId) {
-        return NextResponse.json(
-          { error: "Movement ID is required" },
-          { status: 400 }
-        );
-      }
-
       const result = await movementsService.deleteMovement(user.id, movementId);
 
       if (!result.success) {
@@ -189,7 +154,7 @@ export const MovementsController = {
 
       return NextResponse.json({ message: result.message });
     } catch (error) {
-      console.error("Error deleting movement:", error);
+      console.error("Error in deleteMovement:", error);
       return NextResponse.json(
         { error: "Internal server error" },
         { status: 500 }

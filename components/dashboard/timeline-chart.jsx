@@ -12,6 +12,9 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
+import TimelineTabs from "../ui/timeline-tabs";
+import { formatTimelineDate } from "@/utils/formats";
+import { memo, useMemo } from "react";
 import {
   AreaChart,
   Area,
@@ -21,63 +24,78 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-export default function TimelineChart({ data, color }) {
-  const chartData = data
-    .map((item) => ({
-      month: new Date(item.month).toLocaleDateString("en-US", {
-        month: "short",
-        year: "numeric",
-      }),
-      amount: parseFloat(item.total_amount) || 0,
-      movements: parseInt(item.movement_count) || 0,
-    }))
-    .reverse();
+const TimelineChart = memo(
+  ({ data, color, period = "months", onPeriodChange }) => {
+    const chartData = useMemo(() => {
+      return data
+        .map((item) => ({
+          period: formatTimelineDate(
+            item.month || item.week || item.day,
+            period
+          ),
+          amount: parseFloat(item.total_amount) || 0,
+          movements: parseInt(item.movement_count) || 0,
+        }))
+        .reverse();
+    }, [data, period]);
 
-  return (
-    <Card className="w-full">
-      <CardHeader className="text-center">
-        <CardTitle className="text-base sm:text-lg">
-          Timeline {chartData.length === 4 ? "(Last 4 months)" : ""}
-        </CardTitle>
-        <CardDescription className="text-sm sm:text-base">
-          Timeline of your balance
-        </CardDescription>
-      </CardHeader>
+    return (
+      <Card className="w-full">
+        <CardHeader>
+          <div className="flex justify-between items-start sm:items-center gap-4">
+            <div className="flex-1">
+              <CardTitle className="text-base sm:text-lg">Timeline</CardTitle>
+              <CardDescription className="text-sm sm:text-base md:hidden lg:block">
+                Timeline of your balance
+              </CardDescription>
+            </div>
+            <div className="flex-shrink-0">
+              <TimelineTabs activeTab={period} onTabChange={onPeriodChange} />
+            </div>
+          </div>
+        </CardHeader>
 
-      <CardContent className="pt-0">
-        <div className="w-full h-[1px] bg-gray-200 my-4" />
+        <CardContent className="pt-0">
+          <div className="w-full h-[1px] bg-gray-200 my-4" />
 
-        <ChartContainer
-          config={{
-            month: {
-              label: "Month",
-            },
-            amount: {
-              label: `Total Amount: `,
-            },
-            movements: {
-              label: "Number of Movements",
-            },
-          }}
-          className="w-full min-h-[200px] sm:h-[292px]"
-        >
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="month" tick={{ fontSize: 10 }} minTickGap={15} />
-              <YAxis padding={{ top: 15 }} tick={{ fontSize: 10 }} />
-              <ChartTooltip content={<ChartTooltipContent />} />
-              <Area
-                type="monotone"
-                dataKey="amount"
-                stroke={color}
-                fill={color}
-                fillOpacity={0.3}
-              />
-            </AreaChart>
-          </ResponsiveContainer>
-        </ChartContainer>
-      </CardContent>
-    </Card>
-  );
-}
+          <ChartContainer
+            config={{
+              period: {
+                label: "Period",
+              },
+              amount: {
+                label: `Total Amount: `,
+              },
+              movements: {
+                label: "Number of Movements",
+              },
+            }}
+            className="w-full min-h-[200px] sm:h-[292px]"
+          >
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis
+                  dataKey="period"
+                  tick={{ fontSize: 10 }}
+                  minTickGap={15}
+                />
+                <YAxis padding={{ top: 15 }} tick={{ fontSize: 10 }} />
+                <ChartTooltip content={<ChartTooltipContent />} />
+                <Area
+                  type="monotone"
+                  dataKey="amount"
+                  stroke={color}
+                  fill={color}
+                  fillOpacity={0.3}
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </ChartContainer>
+        </CardContent>
+      </Card>
+    );
+  }
+);
+
+export default TimelineChart;

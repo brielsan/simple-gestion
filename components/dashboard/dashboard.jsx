@@ -3,19 +3,41 @@
 import { useMemo, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { useDashboardStats } from "@/hooks/use-dashboard";
+import { useTimelineStats } from "@/hooks/use-timeline";
 import { movementCrudService } from "@/services/client/movement-crud-service";
 import TotalBalanceCard from "./total-balance-card";
 import AsesoriaCard from "./asesoria-card";
-import CategoryChart from "./category-chart";
-import TimelineChart from "./timeline-chart";
-import TimelineBarChart from "./timeline-bar-chart";
-import CategoryBarChart from "./category-chart-bar";
-import MovementModal from "../movements/movement-modal";
+
 import { mutate as mutateGeneral } from "swr";
 import { IncomeButton } from "../ui/income-button";
 import { ExpenseButton } from "../ui/expense-button";
+import dynamic from "next/dynamic";
+import Loader from "../ui/loader";
+
+const CategoryChart = dynamic(() => import("./category-chart"), {
+  ssr: false,
+  loading: () => <Loader />,
+});
+const TimelineChart = dynamic(() => import("./timeline-chart"), {
+  ssr: false,
+  loading: () => <Loader />,
+});
+const TimelineBarChart = dynamic(() => import("./timeline-bar-chart"), {
+  ssr: false,
+  loading: () => <Loader />,
+});
+const CategoryBarChart = dynamic(() => import("./category-chart-bar"), {
+  ssr: false,
+  loading: () => <Loader />,
+});
+const MovementModal = dynamic(() => import("../movements/movement-modal"), {
+  ssr: false,
+  loading: () => <Loader />,
+});
 
 export default function Dashboard({ user }) {
+  const [timelinePeriod, setTimelinePeriod] = useState("months");
+
   const {
     stats: dashboardData,
     isLoading,
@@ -23,14 +45,25 @@ export default function Dashboard({ user }) {
     mutate,
   } = useDashboardStats();
 
+  const {
+    timelineData,
+    isLoading: timelineLoading,
+    error: timelineError,
+    mutate: mutateTimeline,
+  } = useTimelineStats(timelinePeriod);
+
   const [showModal, setShowModal] = useState(false);
   const [preSelectedType, setPreSelectedType] = useState(null);
 
   const handleCreateMovement = async (movementData) => {
     try {
       await movementCrudService.createMovement(movementData);
-      mutate();
-      mutateGeneral("/api/dashboard/stats");
+      mutateGeneral(
+        (key) => typeof key === "string" && key.startsWith("/api/dashboard")
+      );
+      mutateGeneral(
+        (key) => typeof key === "string" && key.startsWith("/api/movements")
+      );
     } catch (error) {
       console.error("Error creating movement:", error);
       alert("Error creating movement: " + error.message);
@@ -47,20 +80,16 @@ export default function Dashboard({ user }) {
     setPreSelectedType(null);
   };
 
+  const handleTimelineChange = (period) => {
+    setTimelinePeriod(period);
+  };
+
   const colorTimeline = useMemo(() => {
     if (!dashboardData) return "text-gray-600";
     return dashboardData.totalIncome + dashboardData.totalExpenses > 0
       ? "#00A63D"
       : "#E7000B";
   }, [dashboardData]);
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
-    );
-  }
 
   if (error) {
     return (
@@ -92,7 +121,7 @@ export default function Dashboard({ user }) {
             Welcome back, <strong>{user?.username}</strong>.
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           <IncomeButton onClick={() => openCreateModal("income")} />
           <ExpenseButton onClick={() => openCreateModal("expense")} />
         </div>
@@ -103,6 +132,7 @@ export default function Dashboard({ user }) {
           incomes={dashboardData.totalIncome}
           expenses={dashboardData.totalExpenses}
           total={dashboardData.totalIncome - dashboardData.totalExpenses}
+          loading={isLoading}
         />
 
         <div>
@@ -119,14 +149,18 @@ export default function Dashboard({ user }) {
         </div>
         <div className="hidden md:block">
           <TimelineChart
-            data={dashboardData.monthlyStats}
+            data={timelineData}
             color={colorTimeline}
+            period={timelinePeriod}
+            onPeriodChange={handleTimelineChange}
           />
         </div>
         <div className="block md:hidden">
           <TimelineBarChart
-            data={dashboardData.monthlyStats}
+            data={timelineData}
             color={colorTimeline}
+            period={timelinePeriod}
+            onPeriodChange={handleTimelineChange}
           />
         </div>
       </div>

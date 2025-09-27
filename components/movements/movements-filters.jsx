@@ -3,8 +3,11 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
-import { Filter, ChevronDown } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Filter, ChevronDown, Search } from "lucide-react";
 import { useParameters } from "@/contexts/parameters-context";
+import { useDebounce } from "@/hooks/use-debounce";
+import { useEffect, useState } from "react";
 
 export default function MovementsFilters({
   selectedCategory,
@@ -15,12 +18,24 @@ export default function MovementsFilters({
   setDateFrom,
   dateTo,
   setDateTo,
+  description,
+  setDescription,
   showFilters,
   setShowFilters,
   applyFilters,
   clearFilters,
 }) {
   const { categories, types, isLoading, error } = useParameters();
+  const [localDescription, setLocalDescription] = useState(description);
+  const debouncedDescription = useDebounce(localDescription, 500);
+
+  useEffect(() => {
+    setDescription(debouncedDescription);
+  }, [debouncedDescription, setDescription]);
+
+  useEffect(() => {
+    setLocalDescription(description);
+  }, [description]);
 
   if (isLoading) {
     return (
@@ -61,23 +76,32 @@ export default function MovementsFilters({
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center space-x-2">
-            <Filter className="h-5 w-5" />
-            <span>Filters</span>
-          </CardTitle>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowFilters(!showFilters)}
-          >
-            {showFilters ? "Hide" : "Show"} Filters
-          </Button>
+        <div className="flex items-center justify-between flex-wrap gap-3">
+          {" "}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Input
+              type="text"
+              placeholder="Search by description..."
+              value={localDescription}
+              onChange={(e) => setLocalDescription(e.target.value)}
+              className="pl-10 w-100 max-w-[70vw]"
+            />
+          </div>
+          <div className="flex items-center space-x-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowFilters(!showFilters)}
+            >
+              {showFilters ? "Hide" : "Show"} Filters
+            </Button>
+          </div>
         </div>
       </CardHeader>
 
       {showFilters && (
-        <CardContent>
+        <CardContent className="mt-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">

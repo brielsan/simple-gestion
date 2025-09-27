@@ -10,84 +10,87 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
-  ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
+import TimelineTabs from "../ui/timeline-tabs";
+import { formatTimelineDate } from "@/utils/formats";
+import { memo, useMemo } from "react";
 
-export default function TimelineBarChart({ data, color }) {
-  const chartData = data
-    .map((item) => ({
-      month: new Date(item.month).toLocaleDateString("en-US", {
-        month: "short",
-      }),
-      amount: parseFloat(item.total_amount) || 0,
-      movements: parseInt(item.movement_count) || 0,
-    }))
-    .reverse();
+const TimelineBarChart = memo(
+  ({ data, color, period = "months", onPeriodChange }) => {
+    const chartData = useMemo(() => {
+      return data
+        .map((item) => ({
+          period: formatTimelineDate(
+            item.month || item.week || item.day,
+            period
+          ),
+          amount: parseFloat(item.total_amount) || 0,
+          movements: parseInt(item.movement_count) || 0,
+        }))
+        .reverse();
+    }, [data, period]);
 
-  const chartConfig = {
-    amount: {
-      label: "Amount",
-      color: color,
-    },
-  };
+    const chartConfig = {
+      amount: {
+        label: "Amount",
+        color: color,
+      },
+    };
 
-  // Calcular el porcentaje de crecimiento
-  const calculateGrowth = () => {
-    if (chartData.length < 2) return 0;
-    const current = chartData[0].amount;
-    const previous = chartData[1].amount;
-    if (previous === 0) return 0;
-    return ((current - previous) / previous) * 100;
-  };
-
-  const growth = calculateGrowth();
-
-  return (
-    <Card className="w-full">
-      <CardHeader className="text-center mb-4">
-        <CardTitle className="text-base sm:text-lg">
-          Timeline {chartData.length === 4 ? "(Last 4 months)" : ""}
-        </CardTitle>
-        <CardDescription className="text-sm sm:text-base">
-          Timeline of your balance
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <ChartContainer config={chartConfig}>
-          <BarChart
-            accessibilityLayer
-            data={chartData}
-            margin={{
-              top: 20,
-            }}
-          >
-            <CartesianGrid vertical={false} />
-            <XAxis
-              dataKey="month"
-              tickLine={false}
-              tickMargin={10}
-              axisLine={false}
-              tick={{ fontSize: 10 }}
-            />
-            <ChartTooltip
-              cursor={false}
-              content={<ChartTooltipContent hideLabel />}
-            />
-            <Bar dataKey="amount" fill={color} radius={8}>
-              <LabelList
-                position="top"
-                offset={12}
-                className="fill-foreground"
-                fontSize={10}
-                formatter={(value) => `$${value.toLocaleString()}`}
+    return (
+      <Card className="w-full">
+        <CardHeader className="mb-4">
+          <div className="flex justify-between items-start gap-4">
+            <div className="flex-1">
+              <CardTitle className="text-base sm:text-lg">Timeline</CardTitle>
+              <CardDescription className="text-sm sm:text-base">
+                Timeline of your balance
+              </CardDescription>
+            </div>
+            <div className="flex-shrink-0">
+              <TimelineTabs activeTab={period} onTabChange={onPeriodChange} />
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <ChartContainer config={chartConfig}>
+            <BarChart
+              accessibilityLayer
+              data={chartData}
+              margin={{
+                top: 20,
+              }}
+            >
+              <CartesianGrid vertical={false} />
+              <XAxis
+                dataKey="period"
+                tickLine={false}
+                tickMargin={10}
+                axisLine={false}
+                tick={{ fontSize: 10 }}
               />
-            </Bar>
-          </BarChart>
-        </ChartContainer>
-      </CardContent>
-    </Card>
-  );
-}
+              <ChartTooltip
+                cursor={false}
+                content={<ChartTooltipContent hideLabel />}
+              />
+              <Bar dataKey="amount" fill={color} radius={8}>
+                <LabelList
+                  position="top"
+                  offset={12}
+                  className="fill-foreground"
+                  fontSize={10}
+                  formatter={(value) => `$${value.toLocaleString()}`}
+                />
+              </Bar>
+            </BarChart>
+          </ChartContainer>
+        </CardContent>
+      </Card>
+    );
+  }
+);
+
+export default TimelineBarChart;

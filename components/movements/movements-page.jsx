@@ -1,37 +1,47 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Loader2, Plus, TrendingUp, TrendingDown } from "lucide-react";
 import { useMovements } from "@/hooks/use-movements";
 import { movementCrudService } from "@/services/client/movement-crud-service";
 import { Button } from "@/components/ui/button";
 import MovementsFilters from "./movements-filters";
-import MovementsList from "./movements-list";
 import MovementsPagination from "./movements-pagination";
 import MovementsInfo from "./movements-info";
+import MovementsSummary from "./movements-summary";
 import MovementModal from "./movement-modal";
 import { mutate as mutateGeneral } from "swr";
 import { IncomeButton } from "../ui/income-button";
 import { ExpenseButton } from "../ui/expense-button";
+import dynamic from "next/dynamic";
+import Loader from "../ui/loader";
+
+const MovementsList = dynamic(() => import("./movements-list"), {
+  ssr: false,
+  loading: () => <Loader />,
+});
 
 export default function MovementsPage() {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedType, setSelectedType] = useState("all");
   const [dateFrom, setDateFrom] = useState(null);
   const [dateTo, setDateTo] = useState(null);
+  const [description, setDescription] = useState("");
   const [showFilters, setShowFilters] = useState(false);
   const [page, setPage] = useState(1);
   const [showModal, setShowModal] = useState(false);
   const [editingMovement, setEditingMovement] = useState(null);
   const [preSelectedType, setPreSelectedType] = useState(null);
 
-  const { movements, pagination, isLoading, error, mutate } = useMovements({
-    page,
-    categoryId: selectedCategory,
-    typeId: selectedType,
-    dateFrom,
-    dateTo,
-  });
+  const { movements, pagination, totalAmount, isLoading, error, mutate } =
+    useMovements({
+      page,
+      categoryId: selectedCategory,
+      typeId: selectedType,
+      dateFrom,
+      dateTo,
+      description,
+    });
 
   const goToPage = (pageNum) => {
     if (pageNum >= 1 && pageNum <= pagination.totalPages) {
@@ -49,13 +59,18 @@ export default function MovementsPage() {
     setSelectedType("all");
     setDateFrom(null);
     setDateTo(null);
+    setDescription("");
     setPage(1);
     setShowFilters(false);
   };
 
   const refreshData = () => {
-    mutate();
-    mutateGeneral("/api/dashboard/stats");
+    mutateGeneral(
+      (key) => typeof key === "string" && key.startsWith("/api/dashboard")
+    );
+    mutateGeneral(
+      (key) => typeof key === "string" && key.startsWith("/api/movements")
+    );
   };
 
   const handleCreateMovement = async (movementData) => {
@@ -107,13 +122,17 @@ export default function MovementsPage() {
     setPreSelectedType(null);
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
-    );
-  }
+  const hasFilters = useMemo(() => {
+    selectedCategory !== "all" ||
+      selectedType !== "all" ||
+      dateFrom !== null ||
+      dateTo !== null ||
+      (description && description.trim() !== "");
+  }, [selectedCategory, selectedType, dateFrom, dateTo, description]);
+
+  const hasPagination = useMemo(() => {
+    return pagination.totalPages > 1;
+  }, [pagination.totalPages]);
 
   if (error) {
     return (
@@ -137,7 +156,7 @@ export default function MovementsPage() {
         <p className="text-gray-600">
           Manage and filter all your financial movements
         </p>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           <IncomeButton onClick={() => openCreateModal("income")} />
           <ExpenseButton onClick={() => openCreateModal("expense")} />
         </div>
@@ -152,34 +171,53 @@ export default function MovementsPage() {
         setDateFrom={setDateFrom}
         dateTo={dateTo}
         setDateTo={setDateTo}
+        description={description}
+        setDescription={setDescription}
         showFilters={showFilters}
         setShowFilters={setShowFilters}
         applyFilters={applyFilters}
         clearFilters={clearFilters}
       />
 
+      {!isLoading && !error && (
+        <MovementsSummary
+          totalAmount={totalAmount}
+          totalMovements={pagination.totalMovements}
+          hasFilters={hasFilters}
+        />
+      )}
+
       <MovementsInfo
         movementsCount={movements.length}
         totalMovements={pagination.totalMovements}
         selectedCategory={selectedCategory}
+        setSelectedCategory={setSelectedCategory}
         selectedType={selectedType}
+        setSelectedType={setSelectedType}
         dateFrom={dateFrom}
+        setDateFrom={setDateFrom}
         dateTo={dateTo}
+        setDateTo={setDateTo}
+        description={description}
+        setDescription={setDescription}
       />
 
       <MovementsList
         movements={movements}
+        isLoading={isLoading}
         onEdit={openEditModal}
         onDelete={handleDeleteMovement}
       />
 
-      <MovementsPagination
-        currentPage={page}
-        totalPages={pagination.totalPages}
-        hasPrevPage={pagination.hasPrevPage}
-        hasNextPage={pagination.hasNextPage}
-        goToPage={goToPage}
-      />
+      {hasPagination && (
+        <MovementsPagination
+          currentPage={page}
+          totalPages={pagination.totalPages}
+          hasPrevPage={pagination.hasPrevPage}
+          hasNextPage={pagination.hasNextPage}
+          goToPage={goToPage}
+        />
+      )}
 
       <MovementModal
         isOpen={showModal}

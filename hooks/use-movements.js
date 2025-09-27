@@ -9,6 +9,7 @@ export function useMovements(filters = {}) {
     typeId,
     dateFrom,
     dateTo,
+    description,
   } = filters;
 
   const params = {
@@ -32,6 +33,10 @@ export function useMovements(filters = {}) {
     params.dateTo = dateTo.toISOString().split("T")[0];
   }
 
+  if (description && description.trim() !== "") {
+    params.description = description;
+  }
+
   const { data, error, isLoading, mutate } = useSWR(
     ["/api/movements", params],
     ([url, params]) => fetcherWithParams(url, params),
@@ -44,6 +49,7 @@ export function useMovements(filters = {}) {
   return {
     movements: data?.movements || [],
     pagination: data?.pagination || {},
+    totalAmount: data?.totalAmount || 0,
     isLoading,
     error,
     mutate,
