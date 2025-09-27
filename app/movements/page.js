@@ -1,9 +1,17 @@
 "use client";
 
-import { Suspense } from "react";
 import Header from "@/components/header";
-import MovementsPage from "@/components/movements/movements-page";
 import ProtectedRoute from "@/components/auth/protected-route";
+import dynamic from "next/dynamic";
+import Loader from "@/components/ui/loader";
+
+const MovementsPage = dynamic(
+  () => import("@/components/movements/movements-page"),
+  {
+    ssr: false,
+    loading: () => <Loader />,
+  }
+);
 
 export default function Movements() {
   return (
@@ -14,16 +22,7 @@ export default function Movements() {
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Movements</h1>
           </div>
-
-          <Suspense
-            fallback={
-              <div className="flex items-center justify-center h-64">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-              </div>
-            }
-          >
-            <MovementsPage />
-          </Suspense>
+          <MovementsPage />
         </main>
       </div>
     </ProtectedRoute>

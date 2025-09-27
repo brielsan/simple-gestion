@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /dashboard/
+Disallow: /movements/
+Disallow: /login/
+Disallow: /register/
+
+Sitemap: https://simplegestion.net/sitemap.xml
