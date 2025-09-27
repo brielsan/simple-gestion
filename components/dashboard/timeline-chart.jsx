@@ -23,6 +23,7 @@ import {
   CartesianGrid,
   ResponsiveContainer,
 } from "recharts";
+import { TrendingUp } from "lucide-react";
 
 const TimelineChart = memo(
   ({ data, color, period = "months", onPeriodChange }) => {
@@ -42,7 +43,7 @@ const TimelineChart = memo(
     return (
       <Card className="w-full">
         <CardHeader>
-          <div className="flex justify-between items-start sm:items-center gap-4">
+          <div className="flex justify-between items-start sm:items-center gap-4 flex-wrap">
             <div className="flex-1">
               <CardTitle className="text-base sm:text-lg">Timeline</CardTitle>
               <CardDescription className="text-sm sm:text-base md:hidden lg:block">
@@ -50,49 +51,65 @@ const TimelineChart = memo(
               </CardDescription>
             </div>
             <div className="flex-shrink-0">
-              <TimelineTabs activeTab={period} onTabChange={onPeriodChange} />
+              <TimelineTabs
+                activeTab={period}
+                onTabChange={onPeriodChange}
+                disabled={!chartData || chartData.length === 0}
+              />
             </div>
           </div>
         </CardHeader>
 
-        <CardContent className="pt-0">
-          <div className="w-full h-[1px] bg-gray-200 my-4" />
+        {!chartData || chartData.length === 0 ? (
+          <CardContent className="pt-0 flex items-center justify-center min-h-[299px]">
+            <div className="text-center text-gray-500">
+              <TrendingUp className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+              <p className="text-sm">No data available for analysis</p>
+              <p className="text-xs text-gray-400 mt-1">
+                Come back when you have saved some data
+              </p>
+            </div>
+          </CardContent>
+        ) : (
+          <CardContent className="pt-0">
+            <div className="w-full h-[1px] bg-gray-200 my-4" />
 
-          <ChartContainer
-            config={{
-              period: {
-                label: "Period",
-              },
-              amount: {
-                label: `Total Amount: `,
-              },
-              movements: {
-                label: "Number of Movements",
-              },
-            }}
-            className="w-full min-h-[200px] sm:h-[292px]"
-          >
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis
-                  dataKey="period"
-                  tick={{ fontSize: 10 }}
-                  minTickGap={15}
-                />
-                <YAxis padding={{ top: 15 }} tick={{ fontSize: 10 }} />
-                <ChartTooltip content={<ChartTooltipContent />} />
-                <Area
-                  type="monotone"
-                  dataKey="amount"
-                  stroke={color}
-                  fill={color}
-                  fillOpacity={0.3}
-                />
-              </AreaChart>
-            </ResponsiveContainer>
-          </ChartContainer>
-        </CardContent>
+            <ChartContainer
+              config={{
+                period: {
+                  label: "Period",
+                },
+                amount: {
+                  label: `Total Amount: `,
+                },
+                movements: {
+                  label: "Number of Movements",
+                },
+              }}
+              className="w-full min-h-[200px] sm:h-[292px]"
+            >
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={chartData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis
+                    dataKey="period"
+                    tick={{ fontSize: 10 }}
+                    minTickGap={15}
+                  />
+                  <YAxis padding={{ top: 15 }} tick={{ fontSize: 10 }} />
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <Area
+                    type="monotone"
+                    dataKey="amount"
+                    stroke={color}
+                    fill={color}
+                    fillOpacity={0.3}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </ChartContainer>
+          </CardContent>
+        )}
       </Card>
     );
   }

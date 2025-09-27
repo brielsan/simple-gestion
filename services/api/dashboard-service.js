@@ -1,4 +1,5 @@
 import { prisma } from "@/db/client.js";
+import { Prisma } from "@prisma/client";
 
 export const dashboardService = {
   async getStats(userId) {
@@ -60,43 +61,43 @@ export const dashboardService = {
 
       switch (period) {
         case "weeks":
-          query = prisma.$queryRaw`
+          query = prisma.$queryRaw(Prisma.sql`
             SELECT 
-              DATE_TRUNC('week', "createdAt") as week,
+              DATE_TRUNC('week', "date") as week,
               SUM(amount)::numeric as total_amount,
               COUNT(*)::integer as movement_count
             FROM movements 
-            WHERE "userId" = ${userId} AND deleted = false
-            GROUP BY DATE_TRUNC('week', "createdAt")
+            WHERE "userId" = ${userId} AND deleted = false AND "date" >= NOW() - INTERVAL '1 week'
+            GROUP BY DATE_TRUNC('week', "date")
             ORDER BY week DESC
             LIMIT 4
-          `;
+          `);
           break;
         case "days":
-          query = prisma.$queryRaw`
+          query = prisma.$queryRaw(Prisma.sql`
             SELECT 
-              DATE_TRUNC('day', "createdAt") as day,
+              DATE_TRUNC('day', "date") as day,
               SUM(amount)::numeric as total_amount,
               COUNT(*)::integer as movement_count
             FROM movements 
-            WHERE "userId" = ${userId} AND deleted = false
-            GROUP BY DATE_TRUNC('day', "createdAt")
+            WHERE "userId" = ${userId} AND deleted = false AND "date" >= NOW() - INTERVAL '1 day'
+            GROUP BY DATE_TRUNC('day', "date")
             ORDER BY day DESC
             LIMIT 7
-          `;
+          `);
           break;
         default: // months
-          query = prisma.$queryRaw`
+          query = prisma.$queryRaw(Prisma.sql`
             SELECT 
-              DATE_TRUNC('month', "createdAt") as month,
+              DATE_TRUNC('month', "date") as month,
               SUM(amount)::numeric as total_amount,
               COUNT(*)::integer as movement_count
             FROM movements 
-            WHERE "userId" = ${userId} AND deleted = false
-            GROUP BY DATE_TRUNC('month', "createdAt")
+            WHERE "userId" = ${userId} AND deleted = false AND "date" >= NOW() - INTERVAL '4 months'
+            GROUP BY DATE_TRUNC('month', "date")
             ORDER BY month DESC
             LIMIT 4
-          `;
+          `);
       }
 
       const data = await query;
