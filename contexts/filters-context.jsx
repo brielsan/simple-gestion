@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext } from "react";
-import { useMovementsFilters } from "@/hooks/use-movements";
+import { useParameters } from "./parameters-context";
 
 const FiltersContext = createContext({
   categories: [],
@@ -11,7 +11,7 @@ const FiltersContext = createContext({
 });
 
 export function FiltersProvider({ children }) {
-  const { categories, types, isLoading, error } = useMovementsFilters();
+  const { categories, types, isLoading, error } = useParameters();
 
   return (
     <FiltersContext.Provider

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { authService } from "@/services/auth-service.js";
+import { authService } from "@/services/api/auth-service.js";
 import { validateAuthRequest } from "@/lib/validators.js";
 import { cookies } from "next/headers";
 
@@ -10,7 +10,10 @@ export const AuthController = {
 
       const validation = validateAuthRequest({ email, password });
       if (!validation.isValid) {
-        return NextResponse.json({ error: validation.errors }, { status: 400 });
+        return NextResponse.json(
+          { error: "Invalid credentials" },
+          { status: 400 }
+        );
       }
 
       const result = await authService.login(email, password);

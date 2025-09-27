@@ -1,12 +1,13 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState } from "react";
 
 const ParametersContext = createContext({
   categories: [],
   types: [],
   isLoading: false,
   error: null,
+  loadParameters: () => {},
 });
 
 let isLoadingGlobal = false;
@@ -17,7 +18,7 @@ export function ParametersProvider({ children }) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
+  const loadParameters = async () => {
     if (categories.length > 0 && types.length > 0) {
       return;
     }
@@ -51,8 +52,8 @@ export function ParametersProvider({ children }) {
       }
     };
 
-    fetchParameters();
-  }, []);
+    await fetchParameters();
+  };
 
   return (
     <ParametersContext.Provider
@@ -61,6 +62,7 @@ export function ParametersProvider({ children }) {
         types,
         isLoading,
         error,
+        loadParameters,
       }}
     >
       {children}

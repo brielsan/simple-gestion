@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
+import { isValidEmail } from "@/lib/validators";
+import { useParameters } from "@/contexts/parameters-context";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -14,9 +16,26 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
+  const { loadParameters } = useParameters();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!email || !password) {
+      setError("Email and password are required");
+      return;
+    }
+
+    if (!isValidEmail(email)) {
+      setError("Invalid email");
+      return;
+    }
+
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters");
+      return;
+    }
+
     setIsLoading(true);
     setError("");
 
@@ -32,13 +51,14 @@ export default function LoginPage() {
       const data = await response.json();
 
       if (response.ok) {
+        loadParameters();
         router.push("/");
         router.refresh();
       } else {
-        setError(data.error || "Error al iniciar sesión");
+        setError(data.error || "Error starting session");
       }
     } catch (error) {
-      setError("Error de conexión");
+      setError("Connection error");
     } finally {
       setIsLoading(false);
     }
@@ -64,6 +84,7 @@ export default function LoginPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="your@email.com"
                   required
+                  autoComplete="email"
                 />
               </div>
 
@@ -76,6 +97,7 @@ export default function LoginPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
                   required
+                  minLength={6}
                 />
               </div>
 
