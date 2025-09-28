@@ -26,7 +26,7 @@ import {
 import { TrendingUp } from "lucide-react";
 
 const TimelineChart = memo(
-  ({ data, color, period = "months", onPeriodChange }) => {
+  ({ data, color, period = "months", onPeriodChange, isLoading }) => {
     const chartData = useMemo(() => {
       return data
         .map((item) => ({
@@ -60,7 +60,7 @@ const TimelineChart = memo(
           </div>
         </CardHeader>
 
-        {!chartData || chartData.length === 0 ? (
+        {(!chartData || chartData.length === 0) && !isLoading ? (
           <CardContent className="pt-0 flex items-center justify-center min-h-[299px]">
             <div className="text-center text-gray-500">
               <TrendingUp className="h-12 w-12 mx-auto mb-4 text-gray-400" />

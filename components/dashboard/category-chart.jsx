@@ -18,7 +18,7 @@ import {
 import { memo, useMemo } from "react";
 import { BarChart3 } from "lucide-react";
 
-const CategoryChart = memo(({ data }) => {
+const CategoryChart = memo(({ data, isLoading }) => {
   const chartData = useMemo(
     () =>
       (data || [])
@@ -61,7 +61,7 @@ const CategoryChart = memo(({ data }) => {
         </CardDescription>
       </CardHeader>
 
-      {!chartData || chartData.length === 0 ? (
+      {(!chartData || chartData.length === 0) && !isLoading ? (
         <CardContent className="flex-1 pb-0 flex items-center justify-center min-h-[300px]">
           <div className="text-center text-gray-500">
             <BarChart3 className="h-12 w-12 mx-auto mb-4 text-gray-400" />

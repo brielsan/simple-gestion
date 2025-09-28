@@ -149,10 +149,16 @@ export default function Dashboard() {
 
       <div className="grid gap-4 md:grid-cols-2">
         <div className="hidden md:block">
-          <CategoryChart data={dashboardData.categoryData} />
+          <CategoryChart
+            data={dashboardData.categoryData}
+            isLoading={isLoading}
+          />
         </div>
         <div className="block md:hidden">
-          <CategoryBarChart data={dashboardData.categoryData} />
+          <CategoryBarChart
+            data={dashboardData.categoryData}
+            isLoading={isLoading}
+          />
         </div>
         <div className="hidden md:block">
           <TimelineChart
@@ -160,6 +166,7 @@ export default function Dashboard() {
             color={colorTimeline}
             period={timelinePeriod}
             onPeriodChange={handleTimelineChange}
+            isLoading={timelineLoading}
           />
         </div>
         <div className="block md:hidden">
@@ -168,6 +175,7 @@ export default function Dashboard() {
             color={colorTimeline}
             period={timelinePeriod}
             onPeriodChange={handleTimelineChange}
+            isLoading={timelineLoading}
           />
         </div>
       </div>
