@@ -22,6 +22,7 @@ export const authService = {
             id: user.id,
             email: user.email,
             username: user.username,
+            testmode: user.testmode,
           },
         },
       };
@@ -108,6 +109,7 @@ export const authService = {
           id: true,
           email: true,
           username: true,
+          testmode: true,
         },
       });
 

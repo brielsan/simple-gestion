@@ -1,11 +1,13 @@
 import { prisma } from "@/db/client.js";
 
+const MAX_ADVICES_PER_DAY = 10;
+
 export const aiService = {
   async getAdvice(user) {
     try {
       const userId = user.id;
       const lastAdvice = await prisma.advice.findFirst({
-        where: { userId },
+        where: { userId, deleted: false },
         orderBy: { createdAt: "desc" },
       });
 
@@ -31,7 +33,10 @@ export const aiService = {
           data: {
             advice: lastAdvice.content,
             createdAt: lastAdvice.createdAt,
-            remainingAdvices: Math.max(0, 5 - todayAdvicesCount),
+            remainingAdvices: Math.max(
+              0,
+              MAX_ADVICES_PER_DAY - todayAdvicesCount
+            ),
           },
         };
       }
@@ -67,7 +72,7 @@ export const aiService = {
         },
       });
 
-      if (todayAdvicesCount >= 5) {
+      if (todayAdvicesCount >= MAX_ADVICES_PER_DAY) {
         return {
           success: false,
           message:
@@ -103,7 +108,7 @@ Whenever you add new data, just click the “Refresh” button to update the inf
           COUNT(m.id)::integer as count
         FROM movements m
         INNER JOIN categories c ON m."categoryId" = c.id
-        WHERE m."userId" = ${userId} AND m.deleted = false AND m.amount < 0
+        WHERE m."userId" = ${userId} AND m.deleted = false AND m.amount < 0 AND m."createdAt" >= NOW() - INTERVAL '3 months'
         GROUP BY c.id, c.name
         ORDER BY amount ASC
       `;
@@ -121,7 +126,7 @@ Whenever you add new data, just click the “Refresh” button to update the inf
           SUM(amount)::numeric as total_amount,
           COUNT(*)::integer as movement_count
         FROM movements 
-        WHERE "userId" = ${userId} AND deleted = false
+        WHERE "userId" = ${userId} AND deleted = false AND "createdAt" >= NOW() - INTERVAL '3 months'
         GROUP BY DATE_TRUNC('month', "createdAt")
         ORDER BY month DESC
         LIMIT 3
@@ -132,14 +137,17 @@ You are a personal financial advisor from the "Simple gestión" website.
 The username is "${user.username}".
 Analyze the data provided and generate exactly 4 short, clear, and practical pieces of advice.
 Each piece of advice must start with the symbol "*" and be on its own line (with line breaks).
-Do not include any introduction or summary, only the 4 lines of advice.
+Do not include any introduction or summary, only the 4 lines of advice (MAX 550 characters).
+Today is ${new Date().toLocaleDateString()}.
 
 User data:
 - Total income: ${totalIncome._sum.amount || 0}
 - Total spent: ${totalExpenses._sum.amount || 0}
-- Spending distribution by category: ${JSON.stringify(categoryData)}
+- Spending distribution by category (Last 3 months): ${JSON.stringify(
+        categoryData
+      )}
 - Last 3 months timeline: ${JSON.stringify(monthlyStats)}
-- Last 30 transactions: ${JSON.stringify(recentMovements)}
+- Last 30 transactions (without filter): ${JSON.stringify(recentMovements)}
 
 `;
 
@@ -180,9 +188,10 @@ User data:
         },
       });
 
-      const remainingAdvices = isSystemGenerated
-        ? todayAdvicesCount
-        : Math.max(0, 5 - (todayAdvicesCount + 1));
+      const remainingAdvices = Math.max(
+        0,
+        MAX_ADVICES_PER_DAY - (todayAdvicesCount + isSystemGenerated ? 0 : 1)
+      );
 
       return {
         success: true,

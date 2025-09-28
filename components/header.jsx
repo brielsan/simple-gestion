@@ -12,15 +12,15 @@ import {
 import {
   Settings,
   LogOut,
-  Upload,
   Home,
   TrendingUp,
   Menu,
   X,
+  Wrench,
 } from "lucide-react";
-import Swal from "sweetalert2";
-import { Alert } from "@/utils/alerts";
+import { Alert, Confirm } from "@/utils/alerts";
 import { useAuth } from "@/contexts/user-context";
+import { useSWRConfig } from "swr";
 
 const routes = [
   { path: "/dashboard", label: "Dashboard", icon: Home },
@@ -28,39 +28,72 @@ const routes = [
 ];
 
 export default function Header() {
-  const { user, logout } = useAuth();
+  const { user, logout, checkAuth } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
   const [isLoadingMockup, setIsLoadingMockup] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { mutate } = useSWRConfig();
 
   const handleLogout = async () => {
     await logout();
   };
 
-  const handleLoadMockup = async () => {
-    setIsLoadingMockup(true);
+  const handleTestMode = async () => {
     try {
+      const isEnabling = !user?.testmode;
+
+      if (isEnabling) {
+        if (
+          !(await Confirm(
+            "Enable Test Mode",
+            "This will activate test mode and load sample data to help you explore the application features. All existing movements will be deleted and replaced with sample data. All existing advice will be marked as deleted. This action cannot be undone.",
+            "warning"
+          ))
+        ) {
+          return;
+        }
+      } else {
+        if (
+          !(await Confirm(
+            "Disable Test Mode",
+            "This will disable test mode and delete all your movements. All your advice will be marked as deleted. You will start with a clean slate. This action cannot be undone.",
+            "warning"
+          ))
+        ) {
+          return;
+        }
+      }
+
+      setIsLoadingMockup(true);
       const response = await fetch("/api/mockup", {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ testmode: isEnabling }),
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        Alert(
-          "Mock-up loaded successfully!",
-          `Movements created: ${data.movementsCreated}`,
-          "success",
-          3000
+        await Alert(
+          isEnabling
+            ? "Test mode enabled successfully!"
+            : "Test mode disabled successfully!",
+          isEnabling
+            ? `Sample data loaded: ${data.movementsCreated} movements created`
+            : "All movements and advice have been deleted",
+          "success"
         );
-        router.refresh();
+        mutate((key) => true);
+        checkAuth();
       } else {
         Alert("Error", `${data.error}`, "error");
       }
     } catch (error) {
-      console.error("Error loading the mock-up:", error);
-      Alert("Error", "Error in loading the mock-up", "error");
+      console.error("Error handling test mode:", error);
+      Alert("Error", "Error in test mode operation", "error");
     } finally {
       setIsLoadingMockup(false);
     }
@@ -69,14 +102,14 @@ export default function Header() {
   const settings = useMemo(
     () => [
       {
-        label: "Load Mock-up",
-        icon: Upload,
-        onClick: handleLoadMockup,
+        label: user?.testmode ? "Disable Test Mode" : "Enable Test Mode",
+        icon: Wrench,
+        onClick: handleTestMode,
         disabled: isLoadingMockup,
       },
       { label: "Logout", icon: LogOut, onClick: handleLogout },
     ],
-    [isLoadingMockup]
+    [isLoadingMockup, user?.testmode]
   );
 
   const handleNavigation = (path) => {
