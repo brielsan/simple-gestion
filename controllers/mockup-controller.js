@@ -7,7 +7,7 @@ export const MockupController = {
     try {
       const user = await getCurrentUser();
       if (!user) {
-        return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
       }
 
       const body = await request.json();
@@ -33,7 +33,7 @@ export const MockupController = {
     } catch (error) {
       console.error("Error in mockup controller:", error);
       return NextResponse.json(
-        { error: "Error interno del servidor" },
+        { error: "Internal server error" },
         { status: 500 }
       );
     }

@@ -1,6 +1,6 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import SWRProvider from "@/components/providers/swr-provider";
+import SWRProvider from "@/contexts/swr-context";
 import { ParametersProvider } from "@/contexts/parameters-context";
 import { UserProvider } from "@/contexts/user-context";
 
