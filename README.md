@@ -29,6 +29,10 @@ This project is built with a modern, robust, and scalable technology stack:
 
 ## Core Concepts & Architecture
 
+![Architecture Diagram](./diagram.jpg)
+
+_[View diagram in source](./diagram.jpg)_
+
 ### Authentication and Session Management
 
 Authentication is handled using JSON Web Tokens (JWT). When a user logs in, a token is generated and stored in an HTTP-only cookie for security.
