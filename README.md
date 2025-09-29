@@ -53,6 +53,8 @@ I use `useSWR` (stale-while-revalidate) for client-side data fetching. This stra
 
 This is particularly useful in a financial app where data can change frequently. When a user adds a new transaction, a revalidation of the relevant SWR keys can be triggered, causing the UI to update automatically across all components that use that data, ensuring consistency without manual state management.
 
+**Deduping Interval**: The application is configured with a 5-minute deduping interval. This means that when users navigate between pages, they won't trigger unnecessary data requests as long as the data is still fresh. Data will only be refetched when users perform actions related to what they're viewing, ensuring optimal performance and reducing server load.
+
 ### Database and Prisma ORM
 
 The application uses a PostgreSQL database, with Prisma as the Object-Relational Mapper (ORM). Prisma provides a type-safe API for database queries, which helps prevent common errors and increases developer productivity.
@@ -77,7 +79,7 @@ When a user requests advice, the backend service (`services/api/ai-service.js`) 
 
 A carefully crafted prompt is constructed with this data and sent to the Gemini API. The prompt instructs the AI to act as a financial advisor and generate practical, actionable advice. The response is then saved to the database and displayed to the user.
 
-To prevent abuse, there is a limit of 5 advice requests per user per day.
+To prevent abuse, there is a limit of 10 advice requests per user per day (counting advice for each test mode activated).
 
 ## Getting Started
 
