@@ -28,7 +28,7 @@ const routes = [
 ];
 
 export default function Header() {
-  const { user, logout, checkAuth } = useAuth();
+  const { user, logout } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
   const [isLoadingMockup, setIsLoadingMockup] = useState(false);
@@ -87,7 +87,6 @@ export default function Header() {
           "success"
         );
         mutate((key) => true);
-        checkAuth();
       } else {
         Alert("Error", `${data.error}`, "error");
       }

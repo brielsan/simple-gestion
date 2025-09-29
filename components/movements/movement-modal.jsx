@@ -1,13 +1,12 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { Plus, Edit, Trash2, ChevronDown, X } from "lucide-react";
+import { Edit, Trash2, ChevronDown, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DatePicker } from "@/components/ui/date-picker";
-import { useParameters } from "@/contexts/parameters-context";
-import { formatMoney } from "@/utils/formats";
+import { useParameters } from "@/hooks/use-parameters";
 import { Confirm } from "@/utils/alerts";
 
 export default function MovementModal({
@@ -20,6 +19,7 @@ export default function MovementModal({
   preSelectedType = null,
 }) {
   const { categories, types, isLoading: parametersLoading } = useParameters();
+
   const [formData, setFormData] = useState({
     description: "",
     amount: "",

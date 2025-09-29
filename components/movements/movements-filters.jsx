@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
 import { Filter, ChevronDown, Search } from "lucide-react";
-import { useParameters } from "@/contexts/parameters-context";
+import { useParameters } from "@/hooks/use-parameters";
 import { useDebounce } from "@/hooks/use-debounce";
 import { useEffect, useState } from "react";
 

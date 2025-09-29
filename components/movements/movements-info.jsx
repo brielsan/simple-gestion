@@ -2,13 +2,12 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { useParameters } from "@/contexts/parameters-context";
+import { useParameters } from "@/hooks/use-parameters";
 import { formatCapitalize } from "@/utils/formats";
 import { X } from "lucide-react";
+import { useMemo } from "react";
 
 export default function MovementsInfo({
-  movementsCount,
-  totalMovements,
   selectedCategory,
   setSelectedCategory,
   selectedType,
@@ -21,12 +20,13 @@ export default function MovementsInfo({
   setDescription,
 }) {
   const { categories, types } = useParameters();
-  const hasActiveFilters =
+  const hasActiveFilters = useMemo(() => {
     selectedCategory !== "all" ||
-    selectedType !== "all" ||
-    dateFrom ||
-    dateTo ||
-    (description && description.trim() !== "");
+      selectedType !== "all" ||
+      dateFrom ||
+      dateTo ||
+      (description && description.trim() !== "");
+  }, [selectedCategory, selectedType, dateFrom, dateTo, description]);
 
   return (
     <div className="flex items-center justify-between">

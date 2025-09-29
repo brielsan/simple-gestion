@@ -3,7 +3,6 @@
 import Header from "@/components/header";
 import Dashboard from "@/components/dashboard/dashboard";
 import ProtectedRoute from "@/components/auth/protected-route";
-import { useAuth } from "@/contexts/user-context";
 
 export default function Home() {
   return (

@@ -16,13 +16,13 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
-  const { login, isAuthenticated, isLoading: authLoading } = useAuth();
+  const { login, user, isLoading: authLoading } = useAuth();
 
   useEffect(() => {
-    if (!authLoading && isAuthenticated) {
+    if (!authLoading && user) {
       router.push("/");
     }
-  }, [isAuthenticated, authLoading, router]);
+  }, [user, authLoading, router]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

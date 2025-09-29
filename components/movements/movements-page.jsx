@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useMovements } from "@/hooks/use-movements";
 import { movementCrudService } from "@/services/client/movement-crud-service";
 import MovementsFilters from "./movements-filters";
@@ -149,6 +149,10 @@ export default function MovementsPage() {
   const hasPagination = useMemo(() => {
     return pagination.totalPages > 1;
   }, [pagination.totalPages]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [selectedCategory, selectedType, dateFrom, dateTo, description]);
 
   if (error) {
     return (
