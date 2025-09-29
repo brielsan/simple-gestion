@@ -29,6 +29,14 @@ This project is built with a modern, robust, and scalable technology stack:
 
 ## Core Concepts & Architecture
 
+### Infrastructure Diagram
+
+![Infrastructure Diagram of simplegestion.net](./infra-diagram.jpg)
+
+_[View infrastructure diagram of simplegestion.net in source](./infra-diagram.jpg)_
+
+### Application Architecture
+
 ![Architecture Diagram](./diagram.jpg)
 
 _[View diagram in source](./diagram.jpg)_

@@ -12,5 +12,6 @@ zip -r ./app.zip . \
   -x "node_modules/*" \
   -x "deploy/*" \
   -x "prisma/generated/*" \
+  -x ".next/*" \
 
 echo "Zipped the project successfully!"
