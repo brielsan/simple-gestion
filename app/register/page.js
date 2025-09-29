@@ -73,7 +73,7 @@ export default function RegisterPage() {
 
         if (loginResponse.ok) {
           login(loginData.user);
-          router.push("/dashboard");
+          router.push("/dashboard?showTutorial=true");
         } else {
           setError(loginData.error || "Error starting session");
         }

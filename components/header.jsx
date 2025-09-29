@@ -17,10 +17,12 @@ import {
   Menu,
   X,
   Wrench,
+  HelpCircle,
 } from "lucide-react";
 import { Alert, Confirm } from "@/utils/alerts";
 import { useAuth } from "@/contexts/user-context";
 import { useSWRConfig } from "swr";
+import AppTutorial from "@/components/tutorial/app-tutorial";
 
 const routes = [
   { path: "/dashboard", label: "Dashboard", icon: Home },
@@ -106,6 +108,19 @@ export default function Header() {
   const settings = useMemo(
     () => [
       {
+        label: "Start Tutorial",
+        icon: HelpCircle,
+        onClick: () => {
+          // Trigger tutorial
+          const tutorialButton = document.querySelector(
+            "[data-tutorial-trigger]"
+          );
+          if (tutorialButton) {
+            tutorialButton.click();
+          }
+        },
+      },
+      {
         label: user?.testmode ? "Disable Test Mode" : "Enable Test Mode",
         icon: Wrench,
         onClick: handleTestMode,
@@ -150,7 +165,7 @@ export default function Header() {
   };
 
   return (
-    <header className="bg-white shadow-sm border-b">
+    <header className="sticky top-0 z-50 bg-white shadow-sm border-b">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center space-x-8">
@@ -162,7 +177,10 @@ export default function Header() {
               <span className="sm:hidden">S.G</span>
             </h1>
 
-            <nav className="hidden md:flex items-center space-x-2">
+            <nav
+              className="hidden md:flex items-center space-x-2"
+              data-tutorial="navigation"
+            >
               {routes.map((route) => (
                 <button
                   key={route.path}
@@ -178,7 +196,10 @@ export default function Header() {
 
           <div className="flex items-center space-x-4">
             {user?.testmode && (
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+              <span
+                className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800"
+                data-tutorial="test-mode"
+              >
                 Test Mode
               </span>
             )}
@@ -186,10 +207,18 @@ export default function Header() {
               Welcome, {user?.username}
             </span>
 
+            <div className="hidden">
+              <AppTutorial />
+            </div>
+
             <div className="hidden md:block">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    data-tutorial="settings-button"
+                  >
                     <Settings className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -212,6 +241,7 @@ export default function Header() {
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="md:hidden p-2 rounded-md text-gray-700 hover:text-blue-600 hover:bg-gray-100"
+              data-tutorial="mobile-menu-button"
             >
               {isMobileMenuOpen ? (
                 <X className="h-5 w-5" />
@@ -226,13 +256,6 @@ export default function Header() {
       {isMobileMenuOpen && (
         <div className="md:hidden bg-white border-t">
           <div className="px-4 py-2 space-y-1">
-            {user?.testmode && (
-              <div className="flex justify-center py-2">
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
-                  Test Mode
-                </span>
-              </div>
-            )}
             {routes.map((route) => (
               <button
                 key={route.path}

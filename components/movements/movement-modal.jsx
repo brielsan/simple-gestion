@@ -389,7 +389,7 @@ export default function MovementModal({
               </div>
             )}
 
-            <div className="flex gap-2 pt-4">
+            <div className="flex gap-2 pt-4 flex-wrap-reverse">
               {isEdit && onDelete && (
                 <Button
                   type="button"

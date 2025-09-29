@@ -13,6 +13,7 @@ import dynamic from "next/dynamic";
 import Loader from "../ui/loader";
 import { Alert } from "@/utils/alerts";
 import { useAuth } from "@/contexts/user-context";
+import { useIsMobile } from "@/hooks/use-ismobile";
 
 const CategoryChart = dynamic(() => import("./category-chart"), {
   ssr: false,
@@ -37,6 +38,7 @@ const MovementModal = dynamic(() => import("../movements/movement-modal"), {
 
 export default function Dashboard() {
   const { user } = useAuth();
+  const isMobile = useIsMobile();
 
   const [timelinePeriod, setTimelinePeriod] = useState("months");
 
@@ -120,60 +122,70 @@ export default function Dashboard() {
     <div className="space-y-6">
       <div className="flex justify-between items-end flex-wrap gap-4">
         <div className="flex items-end justify-between flex-wrap gap-4">
-          <p className="text-gray-600">
+          <p className="text-gray-600" data-tutorial="welcome">
             Welcome back, <strong>{user?.username}</strong>.
           </p>
         </div>
-        <div className="flex gap-2 flex-wrap">
+        <div className="flex gap-2 flex-wrap" data-tutorial="add-buttons">
           <IncomeButton onClick={() => openCreateModal("income")} />
           <ExpenseButton onClick={() => openCreateModal("expense")} />
         </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">
-        <TotalBalanceCard
-          incomes={dashboardData.totalIncome}
-          expenses={dashboardData.totalExpenses}
-          total={dashboardData.totalIncome - dashboardData.totalExpenses}
-          loading={isLoading}
-        />
+        <div data-tutorial="balance-card">
+          <TotalBalanceCard
+            incomes={dashboardData.totalIncome}
+            expenses={dashboardData.totalExpenses}
+            total={dashboardData.totalIncome - dashboardData.totalExpenses}
+            loading={isLoading}
+          />
+        </div>
 
-        <div>
+        <div data-tutorial="ai-advice">
           <AsesoriaCard />
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <div className="hidden md:block">
-          <CategoryChart
-            data={dashboardData.categoryData}
-            isLoading={isLoading}
-          />
-        </div>
-        <div className="block md:hidden">
-          <CategoryBarChart
-            data={dashboardData.categoryData}
-            isLoading={isLoading}
-          />
-        </div>
-        <div className="hidden md:block">
-          <TimelineChart
-            data={timelineData}
-            color={colorTimeline}
-            period={timelinePeriod}
-            onPeriodChange={handleTimelineChange}
-            isLoading={timelineLoading}
-          />
-        </div>
-        <div className="block md:hidden">
-          <TimelineBarChart
-            data={timelineData}
-            color={colorTimeline}
-            period={timelinePeriod}
-            onPeriodChange={handleTimelineChange}
-            isLoading={timelineLoading}
-          />
-        </div>
+      <div className="grid gap-4 md:grid-cols-2" data-tutorial="charts">
+        {!isMobile && (
+          <div className="hidden md:block">
+            <CategoryChart
+              data={dashboardData.categoryData}
+              isLoading={isLoading}
+            />
+          </div>
+        )}
+        {isMobile && (
+          <div className="block md:hidden">
+            <CategoryBarChart
+              data={dashboardData.categoryData}
+              isLoading={isLoading}
+            />
+          </div>
+        )}
+        {!isMobile && (
+          <div className="hidden md:block">
+            <TimelineChart
+              data={timelineData}
+              color={colorTimeline}
+              period={timelinePeriod}
+              onPeriodChange={handleTimelineChange}
+              isLoading={timelineLoading}
+            />
+          </div>
+        )}
+        {isMobile && (
+          <div className="block md:hidden">
+            <TimelineBarChart
+              data={timelineData}
+              color={colorTimeline}
+              period={timelinePeriod}
+              onPeriodChange={handleTimelineChange}
+              isLoading={timelineLoading}
+            />
+          </div>
+        )}
       </div>
 
       <MovementModal
