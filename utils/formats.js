@@ -47,3 +47,12 @@ export const formatTimelineDate = (date, period) => {
       });
   }
 };
+
+// format the key given by "useswr"; in some cases, it can be an array
+// in those cases, the first element is the key.
+export const formatSWRKey = (key) => {
+  if (Array.isArray(key)) {
+    return key?.[0];
+  }
+  return key;
+};

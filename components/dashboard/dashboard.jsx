@@ -60,15 +60,13 @@ export default function Dashboard() {
   const handleCreateMovement = async (movementData) => {
     try {
       await movementCrudService.createMovement(movementData);
+      // update dashboard stats
       mutate();
       mutateTimeline();
+      // invalidate cached movements (all pages and filters)
       mutateGeneral((key) => {
-        if (Array.isArray(key)) {
-          return key?.[0]?.startsWith("/api/movements");
-        }
-        return key?.startsWith("/api/movements") && key;
+        return formatSWRKey(key).startsWith("/api/movements");
       });
-      mutateGeneral("/api/ai/advice");
     } catch (error) {
       console.error("Error creating movement:", error);
       Alert("Error", "Error creating movement: " + error.message, "error");
