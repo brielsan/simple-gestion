@@ -85,6 +85,7 @@ export default function LoginPage() {
                 <Input
                   id="email"
                   type="email"
+                  maxLength={255}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="your@email.com"
@@ -98,11 +99,12 @@ export default function LoginPage() {
                 <Input
                   id="password"
                   type="password"
+                  maxLength={255}
+                  minLength={6}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
                   required
-                  minLength={6}
                 />
               </div>
 

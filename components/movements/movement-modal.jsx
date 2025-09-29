@@ -266,6 +266,8 @@ export default function MovementModal({
                     id="amount"
                     type="number"
                     step="0.01"
+                    min="0"
+                    max="999999999.99"
                     value={formData.amount}
                     onChange={(e) =>
                       setFormData((prev) => ({
@@ -292,6 +294,7 @@ export default function MovementModal({
               </label>
               <Input
                 id="description"
+                maxLength={500}
                 value={formData.description}
                 onChange={(e) =>
                   setFormData((prev) => ({

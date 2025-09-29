@@ -104,6 +104,8 @@ export default function RegisterPage() {
                   id="username"
                   name="username"
                   type="text"
+                  maxLength={50}
+                  minLength={3}
                   value={formData.username}
                   onChange={handleChange}
                   placeholder="Your username"
@@ -117,6 +119,7 @@ export default function RegisterPage() {
                   id="email"
                   name="email"
                   type="email"
+                  maxLength={255}
                   value={formData.email}
                   onChange={handleChange}
                   placeholder="your@email.com"
@@ -130,6 +133,8 @@ export default function RegisterPage() {
                   id="password"
                   name="password"
                   type="password"
+                  maxLength={255}
+                  minLength={6}
                   value={formData.password}
                   onChange={handleChange}
                   placeholder="••••••••"
@@ -143,6 +148,8 @@ export default function RegisterPage() {
                   id="confirmPassword"
                   name="confirmPassword"
                   type="password"
+                  maxLength={255}
+                  minLength={6}
                   value={formData.confirmPassword}
                   onChange={handleChange}
                   placeholder="••••••••"
