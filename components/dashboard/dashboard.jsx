@@ -1,13 +1,11 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Loader2 } from "lucide-react";
 import { useDashboardStats } from "@/hooks/use-dashboard";
 import { useTimelineStats } from "@/hooks/use-timeline";
 import { movementCrudService } from "@/services/client/movement-crud-service";
 import TotalBalanceCard from "./total-balance-card";
 import AsesoriaCard from "./asesoria-card";
-
 import { mutate as mutateGeneral } from "swr";
 import { IncomeButton } from "../ui/income-button";
 import { ExpenseButton } from "../ui/expense-button";
@@ -66,7 +64,7 @@ export default function Dashboard() {
       mutateTimeline();
       mutateGeneral((key) => {
         if (Array.isArray(key)) {
-          return key.some((k) => k?.[0]?.startsWith("/api/movements"));
+          return key?.[0]?.startsWith("/api/movements");
         }
         return key?.startsWith("/api/movements") && key;
       });

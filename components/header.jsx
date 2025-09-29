@@ -28,7 +28,7 @@ const routes = [
 ];
 
 export default function Header() {
-  const { user, logout } = useAuth();
+  const { user, logout, setUser } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
   const [isLoadingMockup, setIsLoadingMockup] = useState(false);
@@ -77,7 +77,12 @@ export default function Header() {
       const data = await response.json();
 
       if (response.ok) {
-        await Alert(
+        if (data.user) {
+          const updatedUser = { ...user, testmode: data.user.testmode };
+          setUser(updatedUser);
+        }
+
+        Alert(
           isEnabling
             ? "Test mode enabled successfully!"
             : "Test mode disabled successfully!",
@@ -153,7 +158,8 @@ export default function Header() {
               className="text-xl font-semibold text-gray-900 cursor-pointer hover:text-blue-600 transition-colors"
               onClick={() => handleNavigation("/dashboard")}
             >
-              Simple Gestión
+              <span className="hidden sm:inline">Simple Gestión</span>
+              <span className="sm:hidden">S.G</span>
             </h1>
 
             <nav className="hidden md:flex items-center space-x-2">
@@ -171,6 +177,11 @@ export default function Header() {
           </div>
 
           <div className="flex items-center space-x-4">
+            {user?.testmode && (
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                Test Mode
+              </span>
+            )}
             <span className="text-sm text-gray-700 sm:block hidden">
               Welcome, {user?.username}
             </span>
@@ -215,6 +226,13 @@ export default function Header() {
       {isMobileMenuOpen && (
         <div className="md:hidden bg-white border-t">
           <div className="px-4 py-2 space-y-1">
+            {user?.testmode && (
+              <div className="flex justify-center py-2">
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                  Test Mode
+                </span>
+              </div>
+            )}
             {routes.map((route) => (
               <button
                 key={route.path}
