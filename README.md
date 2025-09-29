@@ -88,7 +88,7 @@ To run this project locally, follow these steps:
 1.  **Clone the repository:**
 
     ```bash
-    git clone <repository-url>
+    git clone https://github.com/brielsan/simple-gestion.git
     cd simple-gestion
     ```
 
@@ -98,20 +98,9 @@ To run this project locally, follow these steps:
     npm install
     ```
 
-3.  **Set up the database:**
+3.  **Set up the database and environment variables:**
 
     - Make sure you have a PostgreSQL server running.
-    - Create a `.env` file in the root of the project and add your database connection string:
-      ```
-      DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE?schema=public"
-      ```
-    - Apply the database schema using Prisma:
-      ```bash
-      npx prisma migrate dev
-      ```
-
-4.  **Set up environment variables:**
-
     - Create a `.env` file in the root of the project and add the following variables:
 
       ```
@@ -129,7 +118,12 @@ To run this project locally, follow these steps:
       GEMINI_API_URL="https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
       ```
 
-5.  **Seed the database with initial data:**
+    - Apply the database schema using Prisma:
+      ```bash
+      npx prisma migrate dev
+      ```
+
+4.  **Seed the database with initial data:**
 
     After setting up the environment variables, you need to populate the database with initial transaction types and categories. Execute the seed endpoint with your API key (`process.env.API_KEY`):
 
@@ -160,7 +154,7 @@ To run this project locally, follow these steps:
     - Creates realistic sample data to help users explore the application's features
     - Shows a success message with the number of movements created
 
-6.  **Run the development server:**
+5.  **Run the development server:**
     ```bash
     npm run dev
     ```
