@@ -15,5 +15,6 @@ zip -r ./app.zip . \
   -x ".next/*" \
   -x "infra-diagram.jpg" \
   -x "diagram.jpg" \
+  -x "infra-diagram.jpg"
 
 echo "Zipped the project successfully!"
