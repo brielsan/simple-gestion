@@ -1,1 +1,1 @@
-web: node node_modules/next/dist/bin/next start -p 8080
+web: node node_modules/next/dist/bin/next build && node node_modules/next/dist/bin/next start -p 8080
