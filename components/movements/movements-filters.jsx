@@ -8,6 +8,7 @@ import { Filter, ChevronDown, Search } from "lucide-react";
 import { useParameters } from "@/hooks/use-parameters";
 import { useDebounce } from "@/hooks/use-debounce";
 import { useEffect, useState } from "react";
+import { formatCapitalize } from "@/utils/formats";
 
 export default function MovementsFilters({
   selectedCategory,
@@ -136,7 +137,7 @@ export default function MovementsFilters({
                   <option value="all">All categories</option>
                   {categories.map((category) => (
                     <option key={category.id} value={category.id}>
-                      {category.name}
+                      {formatCapitalize(category.name)}
                     </option>
                   ))}
                 </select>
@@ -156,7 +157,7 @@ export default function MovementsFilters({
                   <option value="all">All types</option>
                   {types.map((type) => (
                     <option key={type.id} value={type.id}>
-                      {type.name}
+                      {formatCapitalize(type.name)}
                     </option>
                   ))}
                 </select>

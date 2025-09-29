@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DatePicker } from "@/components/ui/date-picker";
 import { useParameters } from "@/hooks/use-parameters";
 import { Confirm } from "@/utils/alerts";
+import { formatCapitalize } from "@/utils/formats";
 
 export default function MovementModal({
   isOpen,
@@ -56,7 +57,10 @@ export default function MovementModal({
     [selectedType]
   );
 
+  const [initialSet, setInitialSet] = useState(false);
+
   useEffect(() => {
+    if (initialSet) return;
     if (movement) {
       const displayAmount = Math.abs(movement.amount || 0).toString();
       setFormData({
@@ -80,7 +84,8 @@ export default function MovementModal({
       });
     }
     setErrors({});
-  }, [movement, isOpen, preSelectedType, types, findTypeByName]);
+    setInitialSet(true);
+  }, [movement, isOpen, preSelectedType, findTypeByName, initialSet]);
 
   const validateForm = () => {
     const newErrors = {};
@@ -332,7 +337,7 @@ export default function MovementModal({
                   <option value="">Select category</option>
                   {categories.map((category) => (
                     <option key={category.id} value={category.id}>
-                      {category.name}
+                      {formatCapitalize(category.name)}
                     </option>
                   ))}
                 </select>
