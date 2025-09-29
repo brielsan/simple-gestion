@@ -13,5 +13,7 @@ zip -r ./app.zip . \
   -x "deploy/*" \
   -x "prisma/generated/*" \
   -x ".next/*" \
+  -x "infra-diagram.jpg" \
+  -x "diagram.jpg" \
 
 echo "Zipped the project successfully!"
