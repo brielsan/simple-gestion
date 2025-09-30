@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { Edit, Trash2, ChevronDown, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,9 +9,9 @@ import { DatePicker } from "@/components/ui/date-picker";
 import { useParameters } from "@/hooks/use-parameters";
 import { Confirm } from "@/utils/alerts";
 import { formatCapitalize } from "@/utils/formats";
+import toast from "react-hot-toast";
 
 export default function MovementModal({
-  isOpen,
   onClose,
   onSave,
   movement = null,
@@ -32,10 +32,11 @@ export default function MovementModal({
   const [errors, setErrors] = useState({});
 
   const isEdit = !!movement;
+  const initializedRef = useRef(false);
 
   const findTypeByName = useCallback(
     (typeName) => {
-      if (!types || !typeName) return null;
+      if (!types?.length || !typeName) return null;
       return types.find((t) =>
         t.name.toLowerCase().includes(typeName.toLowerCase())
       );
@@ -43,24 +44,23 @@ export default function MovementModal({
     [types]
   );
 
-  const selectedType = useMemo(
-    () =>
-      formData.typeId ? types.find((t) => t.id === formData.typeId) : null,
-    [formData.typeId, types]
-  );
+  const selectedType = useMemo(() => {
+    if (!formData.typeId || !types?.length) return null;
+    return types.find((t) => t.id === formData.typeId);
+  }, [formData.typeId, types]);
 
-  const isIncome = useMemo(
-    () =>
-      selectedType
-        ? selectedType?.name?.toLowerCase().includes("income")
-        : false,
-    [selectedType]
-  );
+  const isIncome = useMemo(() => {
+    return selectedType?.name?.toLowerCase().includes("income") ?? false;
+  }, [selectedType]);
 
-  const [initialSet, setInitialSet] = useState(false);
+  const preselectedTypeId = useMemo(() => {
+    if (!preSelectedType || !types?.length) return null;
+    return findTypeByName(preSelectedType)?.id;
+  }, [preSelectedType, findTypeByName, types]);
 
   useEffect(() => {
-    if (initialSet) return;
+    if (initializedRef.current) return;
+
     if (movement) {
       const displayAmount = Math.abs(movement.amount || 0).toString();
       setFormData({
@@ -70,24 +70,31 @@ export default function MovementModal({
         typeId: movement.typeId || "",
         date: movement.date ? new Date(movement.date) : new Date(),
       });
-    } else {
-      const preSelectedTypeId = preSelectedType
-        ? findTypeByName(preSelectedType)?.id || ""
-        : "";
-
-      setFormData({
-        description: "",
-        amount: "",
-        categoryId: "",
-        typeId: preSelectedTypeId,
-        date: new Date(),
-      });
+    } else if (preSelectedType && preselectedTypeId) {
+      setFormData((prev) => ({
+        ...prev,
+        typeId: preselectedTypeId,
+      }));
     }
-    setErrors({});
-    setInitialSet(true);
-  }, [movement, isOpen, preSelectedType, findTypeByName, initialSet]);
 
-  const validateForm = () => {
+    setErrors({});
+    initializedRef.current = true;
+  }, [movement, preSelectedType, preselectedTypeId]);
+
+  useEffect(() => {
+    if (!initializedRef.current || !preSelectedType || !preselectedTypeId)
+      return;
+
+    setFormData((prev) => {
+      if (prev.typeId) return prev;
+      return {
+        ...prev,
+        typeId: preselectedTypeId,
+      };
+    });
+  }, [preSelectedType, preselectedTypeId]);
+
+  const validateForm = useCallback(() => {
     const newErrors = {};
 
     if (!formData.description.trim()) {
@@ -112,7 +119,7 @@ export default function MovementModal({
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  };
+  }, [formData]);
 
   const handleSubmit = useCallback(
     async (e) => {
@@ -146,8 +153,14 @@ export default function MovementModal({
 
         if (isEdit) {
           await onEdit(movement.id, movementData);
+          toast.success("Movement updated successfully!", {
+            position: "bottom-center",
+          });
         } else {
           await onSave(movementData);
+          toast.success("Movement created successfully! ", {
+            position: "bottom-center",
+          });
         }
 
         onClose();
@@ -182,7 +195,7 @@ export default function MovementModal({
     }
   }, [movement, onDelete]);
 
-  const getThemeColors = useCallback(() => {
+  const theme = useMemo(() => {
     if (isIncome) {
       return {
         border: "border-green-200",
@@ -199,10 +212,6 @@ export default function MovementModal({
       };
     }
   }, [isIncome]);
-
-  const theme = getThemeColors();
-
-  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
