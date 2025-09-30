@@ -13,6 +13,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { useAuth } from "@/contexts/user-context";
+import { isValidEmail } from "@/lib/validators";
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
@@ -38,6 +39,18 @@ export default function RegisterPage() {
     e.preventDefault();
     setIsLoading(true);
     setError("");
+
+    if (formData.username.length < 3) {
+      setError("The username must be at least 3 characters");
+      setIsLoading(false);
+      return;
+    }
+
+    if (!isValidEmail(formData.email)) {
+      setError("The email is not valid");
+      setIsLoading(false);
+      return;
+    }
 
     if (formData.password !== formData.confirmPassword) {
       setError("The passwords do not match");
