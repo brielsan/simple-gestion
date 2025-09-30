@@ -23,6 +23,7 @@ export async function createUser(email, password, username) {
       email: true,
       username: true,
       createdAt: true,
+      testmode: true,
     },
   });
 }
@@ -50,5 +51,6 @@ export async function authenticateUser(email, password) {
     id: user.id,
     email: user.email,
     username: user.username,
+    testmode: user.testmode,
   };
 }
