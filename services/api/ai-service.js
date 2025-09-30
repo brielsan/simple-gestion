@@ -97,6 +97,7 @@ export const aiService = {
             advice: `No data available yet
 Keeping track of your income and expenses is the first step toward better financial habits. Right now, there are no transactions to analyze, so we can’t generate personalized advice yet.
 Whenever you add new data, just click the “Refresh” button to update the information instantly and get your first financial insights.`,
+            remainingAdvices: MAX_ADVICES_PER_DAY - todayAdvicesCount,
           },
         };
       }
