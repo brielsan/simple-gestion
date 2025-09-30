@@ -1,6 +1,7 @@
 import { getCurrentUser } from "@/lib/auth.js";
 import { createUser, authenticateUser } from "./auth.js";
 import { prisma } from "@/db/client.js";
+import { mockupService } from "./mockup-service.js";
 
 export const authService = {
   async login(email, password) {
@@ -36,7 +37,7 @@ export const authService = {
     }
   },
 
-  async register(email, password, username) {
+  async register(email, password, username, includeDemo = false) {
     try {
       const existingUser = await prisma.user.findUnique({
         where: { email },
@@ -52,6 +53,10 @@ export const authService = {
 
       const user = await createUser(email, password, username);
 
+      if (includeDemo) {
+        await mockupService.toggleTestMode(user, true);
+      }
+
       return {
         success: true,
         data: {
@@ -60,6 +65,7 @@ export const authService = {
             email: user.email,
             username: user.username,
             createdAt: user.createdAt,
+            testmode: includeDemo,
           },
         },
       };

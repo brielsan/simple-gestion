@@ -52,14 +52,19 @@ export const AuthController = {
 
   async register(request) {
     try {
-      const { email, password, username } = await request.json();
+      const { email, password, username, includeDemo } = await request.json();
 
       const validation = validateAuthRequest({ email, password, username });
       if (!validation.isValid) {
         return NextResponse.json({ error: validation.errors }, { status: 400 });
       }
 
-      const result = await authService.register(email, password, username);
+      const result = await authService.register(
+        email,
+        password,
+        username,
+        includeDemo
+      );
 
       if (!result.success) {
         return NextResponse.json(

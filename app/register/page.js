@@ -7,6 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { useAuth } from "@/contexts/user-context";
 
 export default function RegisterPage() {
@@ -15,15 +20,17 @@ export default function RegisterPage() {
     password: "",
     confirmPassword: "",
     username: "",
+    includeDemo: true,
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
   const { login } = useAuth();
   const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [name]: type === "checkbox" ? checked : value,
     });
   };
 
@@ -54,6 +61,7 @@ export default function RegisterPage() {
           email: formData.email,
           password: formData.password,
           username: formData.username,
+          includeDemo: formData.includeDemo,
         }),
       });
 
@@ -155,6 +163,41 @@ export default function RegisterPage() {
                   placeholder="••••••••"
                   required
                 />
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <input
+                  id="includeDemo"
+                  name="includeDemo"
+                  type="checkbox"
+                  checked={formData.includeDemo}
+                  onChange={handleChange}
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                />
+                <Label htmlFor="includeDemo" className="text-sm text-gray-700">
+                  Include DEMO data
+                </Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button
+                      type="button"
+                      className="text-xs text-blue-600 hover:text-blue-800 underline transition-colors"
+                    >
+                      More info
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-80">
+                    <div className="space-y-2">
+                      <h4 className="font-medium text-sm">DEMO Data</h4>
+                      <p className="text-sm text-gray-600">
+                        This will populate your account with sample financial
+                        movements so you can explore the app with realistic
+                        data. You can disable this demo mode later from your
+                        settings.
+                      </p>
+                    </div>
+                  </PopoverContent>
+                </Popover>
               </div>
 
               {error && (
