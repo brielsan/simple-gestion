@@ -14,6 +14,7 @@ import { ExpenseButton } from "../ui/expense-button";
 import dynamic from "next/dynamic";
 import Loader from "../ui/loader";
 import { Alert, Confirm } from "@/utils/alerts";
+import { formatSWRKey } from "@/utils/formats";
 
 const MovementsList = dynamic(() => import("./movements-list"), {
   ssr: false,
@@ -238,15 +239,16 @@ export default function MovementsPage() {
         />
       )}
 
-      <MovementModal
-        isOpen={showModal}
-        onClose={closeModal}
-        onSave={handleCreateMovement}
-        onEdit={handleEditMovement}
-        onDelete={handleDeleteMovement}
-        movement={editingMovement}
-        preSelectedType={preSelectedType}
-      />
+      {showModal && (
+        <MovementModal
+          onClose={closeModal}
+          onSave={handleCreateMovement}
+          onEdit={handleEditMovement}
+          onDelete={handleDeleteMovement}
+          movement={editingMovement}
+          preSelectedType={preSelectedType}
+        />
+      )}
     </div>
   );
 }
