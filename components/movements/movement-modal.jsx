@@ -8,7 +8,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DatePicker } from "@/components/ui/date-picker";
 import { useParameters } from "@/hooks/use-parameters";
 import { Confirm } from "@/utils/alerts";
-import { formatCapitalize } from "@/utils/formats";
+import {
+  formatCapitalize,
+  createDateFromISO,
+  extractDateComponents,
+} from "@/utils/formats";
 import toast from "react-hot-toast";
 
 export default function MovementModal({
@@ -68,7 +72,7 @@ export default function MovementModal({
         amount: displayAmount,
         categoryId: movement.categoryId || "",
         typeId: movement.typeId || "",
-        date: movement.date ? new Date(movement.date) : new Date(),
+        date: movement.date ? createDateFromISO(movement.date) : new Date(),
       });
     } else if (preSelectedType && preselectedTypeId) {
       setFormData((prev) => ({
@@ -140,9 +144,7 @@ export default function MovementModal({
           finalAmount = Math.abs(finalAmount);
         }
 
-        const year = formData.date.getFullYear();
-        const month = String(formData.date.getMonth() + 1).padStart(2, "0");
-        const day = String(formData.date.getDate()).padStart(2, "0");
+        const { year, month, day } = extractDateComponents(formData.date);
         const dateString = `${year}-${month}-${day}`;
 
         const movementData = {

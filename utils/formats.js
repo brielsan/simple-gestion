@@ -11,10 +11,19 @@ export const formatCapitalize = (string) => {
 };
 
 export const formatDate = (date) => {
-  return new Date(date).toLocaleDateString("en-US", {
+  const dateObj = new Date(date);
+
+  const utcDate = new Date(
+    dateObj.getUTCFullYear(),
+    dateObj.getUTCMonth(),
+    dateObj.getUTCDate()
+  );
+
+  return utcDate.toLocaleDateString("en-US", {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
+    timeZone: "UTC",
   });
 };
 
@@ -55,4 +64,40 @@ export const formatSWRKey = (key) => {
     return key?.[0];
   }
   return key;
+};
+
+// format the date for display
+
+export const createDateFromISO = (isoString) => {
+  if (!isoString) return new Date();
+
+  const datePart = isoString.split("T")[0];
+  const [year, month, day] = datePart.split("-").map(Number);
+
+  return new Date(Date.UTC(year, month - 1, day));
+};
+
+export const extractDateComponents = (date) => {
+  const year = date.getUTCFullYear();
+  const month = String(date.getUTCMonth() + 1).padStart(2, "0");
+  const day = String(date.getUTCDate()).padStart(2, "0");
+
+  return { year, month, day };
+};
+
+export const formatDateForDisplay = (date) => {
+  if (!date) return "";
+
+  const { year, month, day } = extractDateComponents(date);
+  return `${month}/${day}/${year}`;
+};
+
+export const convertUTCToLocalForCalendar = (utcDate) => {
+  if (!utcDate) return null;
+
+  const year = utcDate.getUTCFullYear();
+  const month = utcDate.getUTCMonth();
+  const day = utcDate.getUTCDate();
+
+  return new Date(year, month, day);
 };
