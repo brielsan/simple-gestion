@@ -7,7 +7,6 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DatePicker } from "@/components/ui/date-picker";
 import { useParameters } from "@/hooks/use-parameters";
-import { Confirm } from "@/utils/alerts";
 import {
   formatCapitalize,
   createDateFromISO,
@@ -175,27 +174,19 @@ export default function MovementModal({
     [isIncome, isEdit, movement, onSave, onEdit, formData]
   );
 
-  const handleDelete = useCallback(async () => {
+  const handleDelete = async () => {
     if (!movement || !onDelete) return;
 
-    if (
-      await Confirm(
-        "Delete Movement",
-        "Are you sure you want to delete this movement?",
-        "warning"
-      )
-    ) {
-      setIsLoading(true);
-      try {
-        await onDelete(movement.id);
-        onClose();
-      } catch (error) {
-        console.error("Error deleting movement:", error);
-      } finally {
-        setIsLoading(false);
-      }
+    setIsLoading(true);
+    try {
+      await onDelete(movement.id);
+      onClose();
+    } catch (error) {
+      console.error("Error deleting movement:", error);
+    } finally {
+      setIsLoading(false);
     }
-  }, [movement, onDelete]);
+  };
 
   const theme = useMemo(() => {
     if (isIncome) {
