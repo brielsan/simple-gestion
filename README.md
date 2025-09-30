@@ -143,14 +143,13 @@ To run this project locally, follow these steps:
     The `lib/exampleData.json` file contains a comprehensive dataset of sample financial transactions with various categories (groceries, rent, utilities, dining, transportation, entertainment, healthcare, shopping) and types (income, expense). This data serves two purposes:
 
     1. **Database Seeding**: The `/api/seed` endpoint uses this data to populate the database with initial transaction types and categories.
-    2. **Mock-up Data**: Users can load this sample data into their account using the "Load Mock-up" button in the application header.
+    2. **Mock-up Data**: Users can load this sample data into their account using the "Enable Test Mode" button in the application header.
 
     **Load Mock-up Feature:**
 
-    Once logged in, users will find a "Load Mock-up" button in the header dropdown menu. This feature:
+    Once logged in, users will find a "Enable Test Mode" button in the header dropdown menu. This feature:
 
     - Loads all transactions from `exampleData.json` into the user's account
-    - Only works for users who don't have any existing movements (prevents data duplication)
     - Creates realistic sample data to help users explore the application's features
     - Shows a success message with the number of movements created
 
