@@ -9,7 +9,7 @@ import { formatDate } from "@/utils/formats";
 import Loader from "../ui/loader";
 import { adviceService } from "@/services/client/advice-service";
 
-export default function AsesoriaCard() {
+export default function AsesoriaCard({ disableRefresh = false }) {
   const { data, error, isLoading, mutate } = useAdvice();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [refreshError, setRefreshError] = useState(null);
@@ -49,7 +49,7 @@ export default function AsesoriaCard() {
             Tips of the day {data?.createdAt ? formatDate(data?.createdAt) : ""}
           </p>
         </div>
-        {!isLoading && !noData && (
+        {!isLoading && !disableRefresh && (
           <div className="flex items-center">
             <div className="flex items-center gap-3">
               {" "}
@@ -64,7 +64,7 @@ export default function AsesoriaCard() {
                 variant="outline"
                 size="sm"
                 onClick={handleRefresh}
-                disabled={isRefreshing || isLimitReached}
+                disabled={isRefreshing || isLimitReached || disableRefresh}
                 className="h-8 w-8 p-0 cursor-pointer"
                 title={
                   isLimitReached

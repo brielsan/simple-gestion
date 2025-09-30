@@ -14,6 +14,7 @@ import Loader from "../ui/loader";
 import { Alert } from "@/utils/alerts";
 import { useAuth } from "@/contexts/user-context";
 import { useIsMobile } from "@/hooks/use-ismobile";
+import { formatSWRKey } from "@/utils/formats";
 
 const CategoryChart = dynamic(() => import("./category-chart"), {
   ssr: false,
@@ -143,7 +144,12 @@ export default function Dashboard() {
         </div>
 
         <div data-tutorial="ai-advice">
-          <AsesoriaCard />
+          <AsesoriaCard
+            disableRefresh={
+              dashboardData?.totalIncome === 0 ||
+              dashboardData?.totalExpenses === 0
+            }
+          />
         </div>
       </div>
 
@@ -187,13 +193,13 @@ export default function Dashboard() {
           </div>
         )}
       </div>
-
-      <MovementModal
-        isOpen={showModal}
-        onClose={closeModal}
-        onSave={handleCreateMovement}
-        preSelectedType={preSelectedType}
-      />
+      {showModal && (
+        <MovementModal
+          onClose={closeModal}
+          onSave={handleCreateMovement}
+          preSelectedType={preSelectedType}
+        />
+      )}
     </div>
   );
 }
