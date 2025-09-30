@@ -67,7 +67,7 @@ export const dashboardService = {
               SUM(amount)::numeric as total_amount,
               COUNT(*)::integer as movement_count
             FROM movements 
-            WHERE "userId" = ${userId} AND deleted = false AND "date" >= NOW() - INTERVAL '1 week'
+            WHERE "userId" = ${userId} AND deleted = false AND "date" >= NOW() - INTERVAL '4 weeks'
             GROUP BY DATE_TRUNC('week', "date")
             ORDER BY week DESC
             LIMIT 4
@@ -80,7 +80,7 @@ export const dashboardService = {
               SUM(amount)::numeric as total_amount,
               COUNT(*)::integer as movement_count
             FROM movements 
-            WHERE "userId" = ${userId} AND deleted = false AND "date" >= NOW() - INTERVAL '1 day'
+            WHERE "userId" = ${userId} AND deleted = false AND "date" >= NOW() - INTERVAL '7 days'
             GROUP BY DATE_TRUNC('day', "date")
             ORDER BY day DESC
             LIMIT 7
@@ -101,6 +101,8 @@ export const dashboardService = {
       }
 
       const data = await query;
+
+      console.log(data, "DATA");
 
       return {
         success: true,
