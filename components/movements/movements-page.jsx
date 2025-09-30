@@ -137,11 +137,13 @@ export default function MovementsPage() {
   };
 
   const hasFilters = useMemo(() => {
-    selectedCategory !== "all" ||
+    return (
+      selectedCategory !== "all" ||
       selectedType !== "all" ||
       dateFrom !== null ||
       dateTo !== null ||
-      (description && description.trim() !== "");
+      (description && description.trim() !== "")
+    );
   }, [selectedCategory, selectedType, dateFrom, dateTo, description]);
 
   const hasPagination = useMemo(() => {
@@ -180,7 +182,9 @@ export default function MovementsPage() {
         </div>
       </div>
 
-      {!(!hasFilters && !totalAmount) && (
+      {!hasFilters && !totalAmount ? (
+        <></>
+      ) : (
         <MovementsFilters
           selectedCategory={selectedCategory}
           setSelectedCategory={setSelectedCategory}
